@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق إدارة الأمن والموقع</title>
+    <!-- تضمين مكتبة PapaParse لقراءة ملفات الـ CSV بسهولة -->
+    <script src="https://cloudflare.com"></script>
+    <style>
+        :root {
+            --primary: #10b981;
+            --bg-dark: #111827;
+            --card-bg: #1f2937;
+            --text-main: #f3f4f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        /* شاشة قفل التطبيق */
+        #login-screen {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #374151;
+            background-color: var(--bg-dark);
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        input[type="password"]:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #059669; }
+        .error-msg { color: #ef4444; font-size: 14px; margin-top: 10px; display: none; }
+        
+        /* واجهة التطبيق الرئيسية */
+        #app-screen { display: none; width: 100%; max-width: 800px; padding: 20px; box-sizing: border-box; }
+        .header { background-color: var(--card-bg); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px; border-right: 5px solid var(--primary); }
+        .table-container { background-color: var(--card-bg); border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 500px; }
+        th, td { padding: 14px 16px; border-bottom: 1px solid #374151; }
+        th { background-color: #2d3748; color: var(--primary); font-weight: bold; }
+        tr:hover { background-color: #2d3748; }
+        .footer { text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- شاشة الدخول بكلمة المرور -->
+    <div id="login-screen">
+        <h2>🔒 نظام إدارة الأمن</h2>
+        <p style="color: #9ca3af;">يرجى إدخال كلمة المرور المعتمدة للدخول</p>
+        <input type="password" id="password-input" placeholder="كلمة المرور">
+        <button onclick="checkPassword()">دخول للنظام</button>
+        <div id="error-message" class="error-msg">❌ كلمة المرور غير صحيحة، يرجى المحاولة مجدداً.</div>
+    </div>
+
+    <!-- شاشة التطبيق وعرض البيانات -->
+    <div id="app-screen">
+        <div class="header">
+            <h2 style="margin: 0; color: var(--primary);">📋 لوحة بيانات إدارة الأمن</h2>
+            <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">تحديث تلقائي وفوري من ملفات الإدارة</p>
+        </div>
+
+        <div class="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr id="table-header"></tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr><td style="text-align: center; color: #9ca3af;">جاري تحميل البيانات...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">جميع الحقوق محفوظة لإدارة الأمن © 2026</div>
+    </div>
+
+    <script>
+        // كلمة المرور الافتراضية المحددة للتطبيق (يمكنك تغييرها من هنا في أي وقت)
+        const APP_PASSWORD = "Sec2026_User"; 
+        
+        // رابط ملف الـ CSV الذي قمت برفعه على حسابك
+        const CSV_URL = "أماكن الكاميرات.csv";
+
+        function checkPassword() {
+            const userInput = document.getElementById('password-input').value;
+            const errorMsg = document.getElementById('error-message');
+
+            if (userInput === APP_PASSWORD) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                document.body.style.alignItems = 'flex-start';
+                loadSecurityData();
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function loadSecurityData() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    const fields = results.meta.fields;
+
+                    // 1. بناء عناوين الجدول تلقائياً بناءً على ملف الإكسيل
+                    const headerRow = document.getElementById('table-header');
+                    headerRow.innerHTML = '';
+                    fields.forEach(field => {
+                        const th = document.createElement('th');
+                        th.textContent = field;
+                        headerRow.appendChild(th);
+                    });
+
+                    // 2. تعبئة صفوف الجدول بالبيانات
+                    const tableBody = document.getElementById('table-body');
+                    tableBody.innerHTML = '';
+                    data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        fields.forEach(field => {
+                            const td = document.createElement('td');
+                            td.textContent = row[field] || '-';
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    });
+                },
+                error: function(err) {
+                    document.getElementById('table-body').innerHTML = 
+                        `<tr><td colspan="100%" style="text-align: center; color: #ef4444;">❌ عذراً، تعذر قراءة ملف البيانات. تأكد من رفع ملف "أماكن الكاميرات.csv" بشكل صحيح.</td></tr>`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
