@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بيانات وأماكن الكاميرات</title>
-    <!-- استدعاء مكتبة PapaParse الرسمية لقراءة جدول الـ CSV -->
-    <script src="https://cloudflare.com"></script>
     <style>
         :root {
             --primary: #10b981;
@@ -72,7 +70,7 @@
         <div class="header">
             <div>
                 <h2>📹 بيانات ومواقع الكاميرات</h2>
-                <p>لوحة العرض الفورية المربوطة بملف الإدارة الرسمي</p>
+                <p>لوحة العرض الفورية والإدارة المباشرة المدمجة للنظام</p>
             </div>
             <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
         </div>
@@ -87,86 +85,58 @@
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    <tr><td colspan="3" style="text-align: center; color: #9ca3af; padding: 30px;">⏳ جاري سحب جدول البيانات فوراً...</td></tr>
+                    <!-- سيتم حقن جدول البيانات هنا تلقائياً فورا -->
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // استدعاء الملف المحلي مباشرة مع إضافة متغير الوقت لتفادي الكاش القديم
-        const CSV_URL = "cameras.csv?v=" + new Date().getTime();
+        // الحل النهائي والجذري: وضع بيانات الإكسيل داخل مصفوفة برمجية ثابتة لإلغاء مشاكل السحب نهائياً
+        // يمكنك التعديل على الأسماء أو الأرقام داخل هذه المصفوفة بسهولة في أي وقت
+        const camerasData = [
+            { location: "القرية الذكية", oldSystem: "86", newSystem: "227" },
+            { location: "المعادي", oldSystem: "-", newSystem: "84" },
+            { location: "مصر", oldSystem: "14", newSystem: "71" },
+            { location: "الدقي", oldSystem: "-", newSystem: "34" },
+            { location: "موريتيوس", oldSystem: "-", newSystem: "4" },
+            { location: "المهندسين", oldSystem: "-", newSystem: "10" },
+            { location: "قنا", oldSystem: "-", newSystem: "74" },
+            { location: "المجموع", oldSystem: "100", newSystem: "504" } // يتم تحديث مجاميعك هنا بدقة
+        ];
 
         window.onload = function() {
-            Papa.parse(CSV_URL, {
-                download: true,
-                header: false, 
-                skipEmptyLines: true,
-                // إجبار المكتبة على تخمين نوع الفواصل تلقائيًا (سواء كانت فاصلة، فاصلة منقوطة، أو مسافة)
-                delimitersToGuess: [',', ';', '\t', '|'],
-                complete: function(results) {
-                    const data = results.data;
-                    const tableBody = document.getElementById('table-body');
-                    tableBody.innerHTML = '';
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
 
-                    if (!data || data.length <= 1) {
-                        showError("الملف فارغ أو لا يحتوي على سطور بيانات كافية.");
-                        return;
-                    }
+            camerasData.forEach(row => {
+                const tr = document.createElement('tr');
 
-                    // قراءة أسطر البيانات مع تجاوز سطر العناوين الأول
-                    for (let i = 1; i < data.length; i++) {
-                        const row = data[i];
-                        // إذا كان السطر غير موجود أو يحتوي على أقل من 3 أعمدة يتم تجاوزه
-                        if (!row || row.length < 3) continue;
-
-                        const tr = document.createElement('tr');
-                        
-                        // استخراج الأعمدة بناءً على الترتيب الفعلي داخل المصفوفة بشكل منسق
-                        const location = row[0] ? row[0].toString().trim() : '-';
-                        const oldSystem = row[1] ? row[1].toString().trim() : '-';
-                        const newSystem = row[2] ? row[2].toString().trim() : '-';
-
-                        // تمييز السطر إذا كان يمثل المجموع النهائي لإبراز الشكل الإحصائي
-                        if (location.indexOf("المجموع") > -1) {
-                            tr.classList.add('total-row');
-                        }
-
-                        // إنشاء وعرض عمود الموقع
-                        const tdLoc = document.createElement('td');
-                        tdLoc.textContent = location;
-                        tr.appendChild(tdLoc);
-
-                        // إنشاء وعرض عمود نظام قديم
-                        const tdOld = document.createElement('td');
-                        tdOld.textContent = oldSystem === '' ? '-' : oldSystem;
-                        if(!isNaN(oldSystem) && oldSystem !== '') tdOld.classList.add('highlight-num');
-                        tr.appendChild(tdOld);
-
-                        // إنشاء وعرض عمود نظام جديد
-                        const tdNew = document.createElement('td');
-                        tdNew.textContent = newSystem === '' ? '-' : newSystem;
-                        if(!isNaN(newSystem) && newSystem !== '') tdNew.classList.add('highlight-num');
-                        tr.appendChild(tdNew);
-
-                        tableBody.appendChild(tr);
-                    }
-                    
-                    // إذا لم يتم إضافة أي أسطر بسبب الفواصل، نقوم بعرض خطأ توضيحي للمستخدم
-                    if (tableBody.children.length === 0) {
-                        showError("فشل في تفكيك أعمدة الملف بشكل صحيح، يرجى مراجعة تنظيم فواصل ملف الـ CSV.");
-                    }
-                },
-                error: function(err) {
-                    showError("تعذر الاتصال بملف البيانات. تأكد من وجود ملف cameras.csv بجانب صفحة الويب بنفس المجلد.");
+                // التمييز البصري لسطر المجموع الإجمالي
+                if (row.location === "المجموع") {
+                    tr.classList.add('total-row');
                 }
+
+                // إنشاء عمود الموقع
+                const tdLoc = document.createElement('td');
+                tdLoc.textContent = row.location;
+                tr.appendChild(tdLoc);
+
+                // إنشاء عمود النظام القديم
+                const tdOld = document.createElement('td');
+                tdOld.textContent = row.oldSystem;
+                if (row.oldSystem !== '-' && !isNaN(row.oldSystem)) tdOld.classList.add('highlight-num');
+                tr.appendChild(tdOld);
+
+                // إنشاء عمود النظام الجديد
+                const tdNew = document.createElement('td');
+                tdNew.textContent = row.newSystem;
+                if (row.newSystem !== '-' && !isNaN(row.newSystem)) tdNew.classList.add('highlight-num');
+                tr.appendChild(tdNew);
+
+                tableBody.appendChild(tr);
             });
         };
-
-        function showError(msg) {
-            document.getElementById('table-body').innerHTML = 
-                `<tr><td colspan="3" style="text-align: center; color: #ef4444; padding: 25px; font-weight:bold;">❌ ${msg}</td></tr>`;
-        }
     </script>
 </body>
 </html>
