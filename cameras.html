@@ -94,56 +94,60 @@
     </div>
 
     <script>
-        // تم تصحيح حرف الـ f ليكون صغيراً (small) ليتطابق مع رابط حسابك الفعلي
         const CSV_URL = "https://githubusercontent.com";
 
         window.onload = function() {
+            // تم إلغاء ميزة القراءة بالأسماء وتفعيل القراءة بالترتيب الرقمي للأعمدة (دون مبالاة بالمسافات)
             Papa.parse(CSV_URL, {
                 download: true,
-                header: true,
+                header: false, // تعطيل الهيدر النصي لقراءة المصفوفات الخام مباشرة
                 skipEmptyLines: true,
                 complete: function(results) {
                     const data = results.data;
                     const tableBody = document.getElementById('table-body');
                     tableBody.innerHTML = '';
 
-                    if (!data || data.length === 0) {
-                        showError("الملف فارغ أو لا يحتوي على سطور بيانات.");
+                    if (!data || data.length <= 1) {
+                        showError("الملف فارغ أو لا يحتوي على سطور بيانات كافية.");
                         return;
                     }
 
-                    data.forEach(row => {
+                    // التكرار على السطور مع تخطي السطر الأول (العناوين)
+                    for (let i = 1; i < data.length; i++) {
+                        const row = data[i];
+                        if (!row || row.length === 0) continue;
+
                         const tr = document.createElement('tr');
                         
-                        let cleanedRow = {};
-                        for (let key in row) {
-                            if(key) cleanedRow[key.trim()] = row[key] ? row[key].trim() : '';
-                        }
-                        
-                        const location = cleanedRow['الموقع'] || '-';
-                        const oldSystem = cleanedRow['نظام قديم'] || '-';
-                        const newSystem = cleanedRow['نظام جديد'] || '-';
+                        // سحب البيانات بناءً على الترتيب الفعلي للأعمدة في ملف الإكسيل الخاص بك
+                        const location = row[0] ? row[0].trim() : '-';
+                        const oldSystem = row[1] ? row[1].trim() : '-';
+                        const newSystem = row[2] ? row[2].trim() : '-';
 
+                        // تمييز صف المجموع النهائي
                         if (location.indexOf("المجموع") > -1) {
                             tr.classList.add('total-row');
                         }
 
+                        // عمود الموقع
                         const tdLoc = document.createElement('td');
                         tdLoc.textContent = location;
                         tr.appendChild(tdLoc);
 
+                        // عمود نظام قديم
                         const tdOld = document.createElement('td');
                         tdOld.textContent = oldSystem === '' ? '-' : oldSystem;
                         if(!isNaN(oldSystem) && oldSystem !== '') tdOld.classList.add('highlight-num');
                         tr.appendChild(tdOld);
 
+                        // عمود نظام جديد
                         const tdNew = document.createElement('td');
                         tdNew.textContent = newSystem === '' ? '-' : newSystem;
                         if(!isNaN(newSystem) && newSystem !== '') tdNew.classList.add('highlight-num');
                         tr.appendChild(tdNew);
 
                         tableBody.appendChild(tr);
-                    });
+                    }
                 },
                 error: function(err) {
                     showError("تعذر الاتصال بملف البيانات السحابي. تأكد من سلامة الرابط.");
