@@ -91,8 +91,8 @@
     </div>
 
     <script>
-        // هنا تم وضع رابط جدول الـ Google Sheet الخاص بك بشكل برمجي سليم داخل متغير السكريبت
-        const SHEET_URL = "https://google.com";
+        // الرابط الجديد الخاص بجدولك مدمج بالكامل هنا بشكل برمجي سليم
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/10nuP6e9GJPK-e3CYKoTMB5mDY9u8SGILRcRJfrj3iFo/edit?usp=sharing";
 
         function extractSheetId(url) {
             const matches = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
@@ -126,10 +126,10 @@
                         const tr = document.createElement('tr');
                         const cells = googleRow.c;
                         
-                        // قراءة الثلاثة أعمدة بالترتيب
-                        const location = cells[0] ? cells[0].v : '-';
-                        const oldSystem = cells[1] ? cells[1].v : '-';
-                        const newSystem = cells[2] ? cells[2].v : '-';
+                        // جلب القيم وتأكيد قراءتها بشكل صحيح
+                        const location = (cells && cells[0]) ? cells[0].v : '-';
+                        const oldSystem = (cells && cells[1]) ? cells[1].v : '-';
+                        const newSystem = (cells && cells[2]) ? cells[2].v : '-';
 
                         const tdLoc = document.createElement('td');
                         tdLoc.textContent = location;
@@ -137,19 +137,19 @@
 
                         const tdOld = document.createElement('td');
                         tdOld.textContent = oldSystem;
-                        if(!isNaN(oldSystem)) tdOld.classList.add('highlight-num');
+                        if(!isNaN(oldSystem) && oldSystem !== '-') tdOld.classList.add('highlight-num');
                         tr.appendChild(tdOld);
 
                         const tdNew = document.createElement('td');
                         tdNew.textContent = newSystem;
-                        if(!isNaN(newSystem)) tdNew.classList.add('highlight-num');
+                        if(!isNaN(newSystem) && newSystem !== '-') tdNew.classList.add('highlight-num');
                         tr.appendChild(tdNew);
 
                         tableBody.appendChild(tr);
                     });
                 })
                 .catch(err => {
-                    showError("تعذر الاتصال بـ Google Sheets. تأكد من جعل الجدول 'Anyone with the link' وعمل الحفظ.");
+                    showError("تعذر الاتصال بـ Google Sheets. تأكد من جعل خيار مشاركة الجدول 'Anyone with the link' في الأعلى.");
                 });
         };
 
