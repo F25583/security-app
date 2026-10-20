@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بيانات وأماكن الكاميرات</title>
-    <!-- 1️⃣ تم تصحيح السطر أدناه لاستدعاء مكتبة قراءة جداول الـ CSV بنجاح -->
-    <script src="https://cloudflare.com"></script>
     <style>
         :root {
             --primary: #10b981;
@@ -51,7 +49,6 @@
             text-decoration: none; 
             font-size: 14px;
         }
-        
         .table-container { 
             background-color: var(--card-bg); 
             border-radius: 12px; 
@@ -72,75 +69,98 @@
         <div class="header">
             <div>
                 <h2>📹 بيانات ومواقع الكاميرات</h2>
-                <p>كافة المواقع والمعلومات المسجلة بالجدول مستدعاة تلقائياً</p>
-            </div>
+                <p>مزامنة فورية ومباشرة من جداول Google Sheets</p>
+            </div>https://docs.google.com/spreadsheets/d/e/2PACX-1vSqpu77O6Xvenm1f982RnZAuRv4aejIfEWkPmn7FLNlWaWGQR4axfgKI-oEUhltHXYrGgqKADhwWpS1/pubhtml
             <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
         </div>
 
         <div class="table-container">
             <table id="data-table">
                 <thead>
-                    <tr id="table-header"></tr>
+                    <tr>
+                        <th>الموقع / الفرع</th>
+                        <th>نظام قديم</th>
+                        <th>نظام جديد</th>
+                    </tr>
                 </thead>
                 <tbody id="table-body">
-                    <tr><td style="text-align: center; color: #9ca3af; padding: 30px;">⏳ جاري عرض جدول البيانات فوراً...</td></tr>
+                    <tr><td colspan="3" style="text-align: center; color: #9ca3af; padding: 30px;">⏳ جاري جلب البيانات الحية من Google Sheets...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // 2️⃣ تم ربط الكود بالرابط المباشر للملف ليتجاوز حظر الهواتف تماماً
-        const CSV_URL = "https://githubusercontent.com";
+        // 🚨 ضَعْ رابط جدول Google Sheet الخاص بك كاملاً بين علامتي التنصيص بالأسفل:
+        const SHEET_URL = "ضَع_رابط_جوجل_شيت_الخاص_بك_هنا";
+
+        function extractSheetId(url) {
+            const matches = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            return matches ? matches[1] : null;
+        }
 
         window.onload = function() {
-            Papa.parse(CSV_URL, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    const data = results.data;
-                    const fields = results.meta.fields;
+            const sheetId = extractSheetId(SHEET_URL);
+            if (!sheetId) {
+                showError("رابط جدول Google Sheets غير صحيح.");
+                return;
+            }
 
-                    if (!fields || fields.length === 0) {
-                        showError();
+            // رابط تحويل الجدول إلى صيغة JSON سريعة ومباشرة ومفتوحة بدون حظر
+            const jsonUrl = `https://google.com{sheetId}/gviz/tq?tqx=out:json`;
+
+            fetch(jsonUrl)
+                .then(res => res.text())
+                .then(text => {
+                    // تنظيف استجابة جوجل وتحويلها لكائن برمجى سليم
+                    const rawData = JSON.parse(text.substr(47).slice(0, -2));
+                    const rows = rawData.table.rows;
+                    
+                    const tableBody = document.getElementById('table-body');
+                    tableBody.innerHTML = '';
+
+                    if (!rows || rows.length === 0) {
+                        showError("الجدول فارغ أو لا يحتوي على صفوف بيانات.");
                         return;
                     }
 
-                    const headerRow = document.getElementById('table-header');
-                    headerRow.innerHTML = '';
-                    fields.forEach(field => {
-                        const th = document.createElement('th');
-                        th.textContent = field;
-                        headerRow.appendChild(th);
-                    });
-
-                    const tableBody = document.getElementById('table-body');
-                    tableBody.innerHTML = '';
-                    data.forEach(row => {
+                    rows.forEach(googleRow => {
                         const tr = document.createElement('tr');
-                        fields.forEach(field => {
-                            const td = document.createElement('td');
-                            let cellText = row[field] || '-';
-                            td.textContent = cellText;
-                            
-                            if(!isNaN(cellText) && cellText.trim() !== '') {
-                                td.classList.add('highlight-num');
-                            }
-                            tr.appendChild(td);
-                        });
+                        
+                        // قراءة الثلاثة أعمدة (الموقع، نظام قديم، نظام جديد)
+                        const cells = googleRow.c;
+                        const location = cells[0] ? cells[0].v : '-';
+                        const oldSystem = cells[1] ? cells[1].v : '-';
+                        const newSystem = cells[2] ? cells[2].v : '-';
+
+                        // عمود الموقع
+                        const tdLoc = document.createElement('td');
+                        tdLoc.textContent = location;
+                        tr.appendChild(tdLoc);
+
+                        // عمود نظام قديم
+                        const tdOld = document.createElement('td');
+                        tdOld.textContent = oldSystem;
+                        if(!isNaN(oldSystem)) tdOld.classList.add('highlight-num');
+                        tr.appendChild(tdOld);
+
+                        // عمود نظام جديد
+                        const tdNew = document.createElement('td');
+                        tdNew.textContent = newSystem;
+                        if(!isNaN(newSystem)) tdNew.classList.add('highlight-num');
+                        tr.appendChild(tdNew);
+
                         tableBody.appendChild(tr);
                     });
-                },
-                error: function(err) {
-                    showError();
-                }
-            });
+                })
+                .catch(err => {
+                    showError("تعذر الاتصال بـ Google Sheets. تأكد من جعل الجدول 'Anyone with the link' وعمل الحفظ.");
+                });
         };
 
-        function showError() {
+        function showError(msg) {
             document.getElementById('table-body').innerHTML = 
-                `<tr><td colspan="100%" style="text-align: center; color: #ef4444; padding: 25px; font-weight:bold;">❌ تعذر تحميل الجدول. تأكد من وجود ملف "cameras.csv" بشكل سليم في المجلد الرئيسي وبصيغة CSV UTF-8.</td></tr>`;
+                `<tr><td colspan="3" style="text-align: center; color: #ef4444; padding: 25px; font-weight:bold;">❌ ${msg}</td></tr>`;
         }
     </script>
 </body>
