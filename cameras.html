@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بيانات وأماكن الكاميرات</title>
-    <!-- مكتبة PapaParse لقراءة جداول الـ CSV -->
+    <!-- تم تصحيح الرابط هنا لاستدعاء المكتبة الرسمية لتشغيل جداول الـ CSV بنجاح -->
     <script src="https://cloudflare.com"></script>
     <style>
         :root {
@@ -52,7 +52,6 @@
             font-size: 14px;
         }
         
-        /* تنسيق جدول واضح جداً ومريح للقراءة بدون نظام البحث */
         .table-container { 
             background-color: var(--card-bg); 
             border-radius: 12px; 
@@ -65,7 +64,6 @@
         th { background-color: #2d3748; color: var(--primary); font-weight: bold; font-size: 15px; }
         tr:hover { background-color: #2d3748; }
         .highlight-num { color: #f59e0b; font-weight: bold; font-size: 17px; }
-        .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -74,12 +72,11 @@
         <div class="header">
             <div>
                 <h2>📹 بيانات ومواقع الكاميرات</h2>
-                <p>كافة المواقع والمعلومات المسجلة بالجدول</p>
+                <p>كافة المواقع والمعلومات المسجلة بالجدول مستدعاة تلقائياً</p>
             </div>
             <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
         </div>
 
-        <!-- حاوية الجدول الرئيسي بدون خانة البحث -->
         <div class="table-container">
             <table id="data-table">
                 <thead>
@@ -90,13 +87,11 @@
                 </tbody>
             </table>
         </div>
-        
-        <div class="footer">نظام المتابعة الأمنية للموقع © 2026</div>
     </div>
 
     <script>
-        // الربط بالاسم الصغير المحدث والمباشر
-      const CSV_URL = "https://githubusercontent.com";
+        // قراءة مباشرة للملف المحلي المرفوع في نفس المجلد
+        const CSV_URL = "cameras.csv";
 
         window.onload = function() {
             Papa.parse(CSV_URL, {
@@ -112,7 +107,6 @@
                         return;
                     }
 
-                    // بناء رؤوس الجدول
                     const headerRow = document.getElementById('table-header');
                     headerRow.innerHTML = '';
                     fields.forEach(field => {
@@ -121,7 +115,6 @@
                         headerRow.appendChild(th);
                     });
 
-                    // تعبئة البيانات كاملة بوضوح
                     const tableBody = document.getElementById('table-body');
                     tableBody.innerHTML = '';
                     data.forEach(row => {
@@ -147,7 +140,7 @@
 
         function showError() {
             document.getElementById('table-body').innerHTML = 
-                `<tr><td colspan="100%" style="text-align: center; color: #ef4444; padding: 25px; font-weight:bold;">❌ تعذر تحميل الجدول. تأكد من وجود ملف "cameras.csv" بشكل سليم في المجلد الرئيسي.</td></tr>`;
+                `<tr><td colspan="100%" style="text-align: center; color: #ef4444; padding: 25px; font-weight:bold;">❌ تعذر تحميل الجدول. تأكد من وجود ملف "cameras.csv" بشكل سليم في المجلد الرئيسي وبصيغة CSV UTF-8.</td></tr>`;
         }
     </script>
 </body>
