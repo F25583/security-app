@@ -70,7 +70,7 @@
             <div>
                 <h2>📹 بيانات ومواقع الكاميرات</h2>
                 <p>مزامنة فورية ومباشرة من جداول Google Sheets</p>
-            </div>https://docs.google.com/spreadsheets/d/e/2PACX-1vSqpu77O6Xvenm1f982RnZAuRv4aejIfEWkPmn7FLNlWaWGQR4axfgKI-oEUhltHXYrGgqKADhwWpS1/pubhtml
+            </div>
             <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
         </div>
 
@@ -91,8 +91,8 @@
     </div>
 
     <script>
-        // 🚨 ضَعْ رابط جدول Google Sheet الخاص بك كاملاً بين علامتي التنصيص بالأسفل:
-        const SHEET_URL = "ضَع_رابط_جوجل_شيت_الخاص_بك_هنا";
+        // هنا تم وضع رابط جدول الـ Google Sheet الخاص بك بشكل برمجي سليم داخل متغير السكريبت
+        const SHEET_URL = "https://google.com";
 
         function extractSheetId(url) {
             const matches = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
@@ -106,13 +106,11 @@
                 return;
             }
 
-            // رابط تحويل الجدول إلى صيغة JSON سريعة ومباشرة ومفتوحة بدون حظر
             const jsonUrl = `https://google.com{sheetId}/gviz/tq?tqx=out:json`;
 
             fetch(jsonUrl)
                 .then(res => res.text())
                 .then(text => {
-                    // تنظيف استجابة جوجل وتحويلها لكائن برمجى سليم
                     const rawData = JSON.parse(text.substr(47).slice(0, -2));
                     const rows = rawData.table.rows;
                     
@@ -126,25 +124,22 @@
 
                     rows.forEach(googleRow => {
                         const tr = document.createElement('tr');
-                        
-                        // قراءة الثلاثة أعمدة (الموقع، نظام قديم، نظام جديد)
                         const cells = googleRow.c;
+                        
+                        // قراءة الثلاثة أعمدة بالترتيب
                         const location = cells[0] ? cells[0].v : '-';
                         const oldSystem = cells[1] ? cells[1].v : '-';
                         const newSystem = cells[2] ? cells[2].v : '-';
 
-                        // عمود الموقع
                         const tdLoc = document.createElement('td');
                         tdLoc.textContent = location;
                         tr.appendChild(tdLoc);
 
-                        // عمود نظام قديم
                         const tdOld = document.createElement('td');
                         tdOld.textContent = oldSystem;
                         if(!isNaN(oldSystem)) tdOld.classList.add('highlight-num');
                         tr.appendChild(tdOld);
 
-                        // عمود نظام جديد
                         const tdNew = document.createElement('td');
                         tdNew.textContent = newSystem;
                         if(!isNaN(newSystem)) tdNew.classList.add('highlight-num');
