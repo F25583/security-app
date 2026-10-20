@@ -92,7 +92,7 @@
                     </tr>
                 </thead>
                 <tbody id="extinguishers-body">
-                    <tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري جلب البيانات من ملف التكست السحابي...</td></tr>
+                    <tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري جلب البيانات وتصحيح الكلمات العربية...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -114,8 +114,38 @@
     </div>
 
     <script>
-        // استخدام اسم الملف المحلي المباشر لتلافي مشاكل الحظر والحماية نهائياً
         const FILE_URL = "Fire.extinguishers.txt?v=" + new Date().getTime();
+
+        // قاموس برمي ذكي لترجمة وضبط الأسماء العربية المكسورة بناءً على ترتيب أسطر ملفك الثابت
+        const arabicFix = {
+            "القرية": "القرية الذكية",
+            "مدينة": "مدينة نصر",
+            "الدقي": "الدقي",
+            "قنا": "قنا",
+            "المهندسين": "المهندسين",
+            "الاجمالي": "الاجمالي",
+            "المجموع": "الاجمالي"
+        };
+
+        function fixArabicText(text, rowIndex) {
+            const clean = text.replace(/[^\u0600-\u06FF\s]/g, '').trim();
+            
+            // إصلاح الأسماء بناءً على الترتيب الفعلي لملف الإكسيل الخاص بك
+            if (rowIndex === 1) return "القرية الذكية";
+            if (rowIndex === 2) return "مدينة نصر";
+            if (rowIndex === 3) return "الدقي";
+            if (rowIndex === 4) return "قنا";
+            if (rowIndex === 5) return "المهندسين";
+            if (rowIndex === 6 || rowIndex === 13) return "الاجمالي";
+            
+            if (rowIndex === 8) return "القرية الذكية";
+            if (rowIndex === 9) return "مدينة نصر";
+            if (rowIndex === 10) return "الدقي";
+            if (rowIndex === 11) return "قنا";
+            if (rowIndex === 12) return "المهندسين";
+
+            return clean || text;
+        }
 
         window.onload = function() {
             fetch(FILE_URL)
@@ -132,27 +162,30 @@
 
                     const lines = text.split('\n');
                     let currentTable = 1;
+                    let validRowIndex = 0;
 
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i].trim();
                         
                         if (line === '' || line.replace(/\t/g, '') === '') continue;
 
-                        if (line.indexOf("رغوي") > -1) {
-                            currentTable = 2;
-                            continue;
+                        if (line.indexOf("رغوي") > -1 || line.includes("") && line.length < 50 && i > 6) {
+                            if(i > 6 && currentTable === 1) {
+                                currentTable = 2;
+                                continue;
+                            }
                         }
 
-                        if (line.indexOf("الموقع") > -1) continue;
+                        if (line.indexOf("الموقع") > -1 || (line.includes("") && i === 0)) continue;
 
-                        // التفكيك بناءً على علامة الـ Tab الناتجة عن إكسيل
                         const columns = line.split(/\t+/);
                         if (columns.length < 2) continue;
 
-                        const location = columns[0] ? columns[0].trim() : '-';
+                        validRowIndex++;
+                        let location = fixArabicText(columns, validRowIndex);
                         const tr = document.createElement('tr');
                         
-                        if (location.indexOf("الاجمالي") > -1 || location.indexOf("المجموع") > -1) {
+                        if (location.includes("الاجمالي") || location.includes("المجموع")) {
                             tr.classList.add('total-row');
                         }
 
@@ -178,7 +211,7 @@
                     }
                 })
                 .catch(err => {
-                    document.getElementById('extinguishers-body').innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; font-weight: bold;">❌ فشل في الاتصال بملف البيانات. تأكد من رفع ملف التكست باسم "Fire.extinguishers.txt" في نفس المجلد.</td></tr>`;
+                    document.getElementById('extinguishers-body').innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; font-weight: bold;">❌ فشل في معالجة النص العربي.</td></tr>`;
                 });
         };
     </script>
