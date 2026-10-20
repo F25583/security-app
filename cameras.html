@@ -94,8 +94,8 @@
     </div>
 
     <script>
-        // الحل النهائي لتجنب حظر الحماية (CORS): جلب ملف الـ CSV المحلي مباشرة من نفس المستودع
-        const CSV_URL = "cameras.csv";
+        // إلغاء الحماية والكاش نهائياً عن طريق إضافة توقيت متغير لا يتكرر لاسم الملف الإضافي
+        const CSV_URL = "cameras.csv?v=" + new Date().getTime();
 
         window.onload = function() {
             Papa.parse(CSV_URL, {
@@ -115,11 +115,11 @@
                     // قراءة أسطر البيانات مع تجاوز سطر العناوين الأول
                     for (let i = 1; i < data.length; i++) {
                         const row = data[i];
-                        if (!row || row.length < 3) continue;
+                        if (!row || row.length < 1) continue;
 
                         const tr = document.createElement('tr');
                         
-                        // استخراج الأعمدة بناءً على الترتيب الفعلي داخل ملف الإكسيل
+                        // استخراج الأعمدة بالترتيب الفعلي
                         const location = row[0] ? row[0].trim() : '-';
                         const oldSystem = row[1] ? row[1].trim() : '-';
                         const newSystem = row[2] ? row[2].trim() : '-';
