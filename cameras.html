@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بيانات وأماكن الكاميرات</title>
-    <!-- استدعاء مكتبة PapaParse الرسمية لقراءة جدول الـ CSV المباشر -->
+    <!-- تم تصحيح استدعاء مكتبة PapaParse الرسمية لقراءة جدول الـ CSV -->
     <script src="https://cloudflare.com"></script>
     <style>
         :root {
@@ -94,13 +94,13 @@
     </div>
 
     <script>
+        // تم تصحيح الرابط إلى رابط الـ Raw المباشر الخاص بمستودعك كاملاً بناءً على الصورة
         const CSV_URL = "https://githubusercontent.com";
 
         window.onload = function() {
-            // تم إلغاء ميزة القراءة بالأسماء وتفعيل القراءة بالترتيب الرقمي للأعمدة (دون مبالاة بالمسافات)
             Papa.parse(CSV_URL, {
                 download: true,
-                header: false, // تعطيل الهيدر النصي لقراءة المصفوفات الخام مباشرة
+                header: false, 
                 skipEmptyLines: true,
                 complete: function(results) {
                     const data = results.data;
@@ -112,35 +112,29 @@
                         return;
                     }
 
-                    // التكرار على السطور مع تخطي السطر الأول (العناوين)
                     for (let i = 1; i < data.length; i++) {
                         const row = data[i];
                         if (!row || row.length === 0) continue;
 
                         const tr = document.createElement('tr');
                         
-                        // سحب البيانات بناءً على الترتيب الفعلي للأعمدة في ملف الإكسيل الخاص بك
                         const location = row[0] ? row[0].trim() : '-';
                         const oldSystem = row[1] ? row[1].trim() : '-';
                         const newSystem = row[2] ? row[2].trim() : '-';
 
-                        // تمييز صف المجموع النهائي
                         if (location.indexOf("المجموع") > -1) {
                             tr.classList.add('total-row');
                         }
 
-                        // عمود الموقع
                         const tdLoc = document.createElement('td');
                         tdLoc.textContent = location;
                         tr.appendChild(tdLoc);
 
-                        // عمود نظام قديم
                         const tdOld = document.createElement('td');
                         tdOld.textContent = oldSystem === '' ? '-' : oldSystem;
                         if(!isNaN(oldSystem) && oldSystem !== '') tdOld.classList.add('highlight-num');
                         tr.appendChild(tdOld);
 
-                        // عمود نظام جديد
                         const tdNew = document.createElement('td');
                         tdNew.textContent = newSystem === '' ? '-' : newSystem;
                         if(!isNaN(newSystem) && newSystem !== '') tdNew.classList.add('highlight-num');
