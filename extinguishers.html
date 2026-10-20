@@ -6,7 +6,7 @@
     <title>إدارة طفايات وخراطيم الحريق</title>
     <style>
         :root {
-            --primary: #ef4444; /* اللون الأحمر المخصص لإدارة السلامة ومكافحة الحريق */
+            --primary: #ef4444; /* اللون الأحمر المخصص لإدارة مكافحة الحريق والسلامة */
             --bg-dark: #111827;
             --card-bg: #1f2937;
             --text-main: #f3f4f6;
@@ -61,9 +61,9 @@
             overflow-x: auto; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
             border: 1px solid var(--border-color);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
-        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 700px; }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 750px; }
         th, td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 15px; font-weight: 500; }
         th { background-color: #2d3748; color: #fc8181; font-weight: bold; font-size: 14px; }
         tr:hover { background-color: #2d3748; }
@@ -99,7 +99,7 @@
                     </tr>
                 </thead>
                 <tbody id="extinguishers-body">
-                    <!-- سيتم حقن البيانات تلقائياً -->
+                    <!-- سيتم حقن جدول البيانات هنا تلقائياً فورا -->
                 </tbody>
             </table>
         </div>
@@ -117,14 +117,14 @@
                     </tr>
                 </thead>
                 <tbody id="hoses-body">
-                    <!-- سيتم حقن البيانات تلقائياً -->
+                    <!-- سيتم حقن جدول البيانات هنا تلقائياً فورا -->
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // المصفوفة الأولى: بيانات طفايات الحريق الثابتة
+        // المصفوفة الأولى: بيانات طفايات الحريق المأخوذة من ملف الإحصاء الخاص بك
         const extinguishersData = [
             { location: "القرية الذكية", c3: "0", c4: "0", c45: "140", c6: "59", c9: "0", c25: "1", co2: "3" },
             { location: "مدينة نصر", c3: "10", c4: "0", c45: "12", c6: "126", c9: "2", c25: "1", co2: "0" },
@@ -134,19 +134,20 @@
             { location: "الاجمالي", c3: "37", c4: "19", c45: "152", c6: "330", c9: "3", c25: "2", co2: "23" }
         ];
 
-        // المصفوفة الثانية: بيانات خراطيم الحريق الثابتة
+        // المصفوفة الثانية: بيانات خراطيم الحريق من نفس الملف النصي
         const hosesData = [
             { location: "القرية الذكية", foam: "2", leather: "49", fabric: "40" },
             { location: "مدينة نصر", foam: "2", leather: "12", fabric: "8" },
-            { location: "الدقي", location: "الدقي", foam: "0", leather: "0", fabric: "0" },
+            { location: "الدقي", foam: "0", leather: "0", fabric: "0" },
             { location: "قنا", foam: "4", leather: "6", fabric: "5" },
             { location: "المهندسين", foam: "0", leather: "0", fabric: "1" },
             { location: "الاجمالي", foam: "8", leather: "67", fabric: "54" }
         ];
 
         window.onload = function() {
-            // 1. بناء وحقن جدول طفايات الحريق ديناميكياً
+            // 1. بناء وحقن جدول طفايات الحريق
             const extBody = document.getElementById('extinguishers-body');
+            extBody.innerHTML = '';
             extinguishersData.forEach(row => {
                 const tr = document.createElement('tr');
                 if (row.location === "الاجمالي") tr.classList.add('total-row');
@@ -164,8 +165,9 @@
                 extBody.appendChild(tr);
             });
 
-            // 2. بناء وحقن جدول خراطيم الحريق ديناميكياً
+            // 2. بناء وحقن جدول خراطيم الحريق
             const hosesBody = document.getElementById('hoses-body');
+            hosesBody.innerHTML = '';
             hosesData.forEach(row => {
                 const tr = document.createElement('tr');
                 if (row.location === "الاجمالي") tr.classList.add('total-row');
