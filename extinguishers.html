@@ -76,38 +76,30 @@
     <div class="container">
         <div class="header">
             <div>
-                <h2>🧯 اعداد طفايات وخراطيم الحريق</h2>
-                <p>لوحة السحب المباشر والديناميكي الفوري من ملفات جرد السلامة والأمن</p>
+                <h2>🧯 أعداد طفايات وخراطيم الحريق</h2>
+                <p>لوحة السحب الديناميكي الكامل للعناوين والبيانات الفورية من ملف الجرد</p>
             </div>
             <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
         </div>
 
         <!-- الجدول الأول -->
-        <div class="section-title">🧯 أولاً: توزيع طفايات الحريق واوزنها</div>
+        <div class="section-title" id="title-table1">⏳ جاري قراءة عنوان الجدول الأول...</div>
         <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>الموقع</th><th>3ك</th><th>4ك</th><th>4.5ك</th><th>6ك</th><th>9ك</th><th>25ك</th><th>CO2</th>
-                    </tr>
-                </thead>
-                <tbody id="extinguishers-body">
-                    <tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري جلب البيانات وتصحيح الكلمات العربية...</td></tr>
+            <table id="table-1">
+                <thead id="thead-table1"></thead>
+                <tbody id="tbody-table1">
+                    <tr><td style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب البيانات...</td></tr>
                 </tbody>
             </table>
         </div>
 
         <!-- الجدول الثاني -->
-        <div class="section-title">🪘 ثانياً: منظومة خراطيم الحريق ومواد الإطفاء</div>
+        <div class="section-title" id="title-table2">⏳ جاري قراءة عنوان الجدول الثاني...</div>
         <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>الموقع</th><th>الخراطيم الجلد</th><th>الخراطيم قماش</th>
-                    </tr>
-                </thead>
-                <tbody id="hoses-body">
-                    <tr><td colspan="4" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري جلب بيانات الخراطيم...</td></tr>
+            <table id="table-2">
+                <thead id="thead-table2"></thead>
+                <tbody id="tbody-table2">
+                    <tr><td style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب البيانات...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -116,37 +108,6 @@
     <script>
         const FILE_URL = "Fire.extinguishers.txt?v=" + new Date().getTime();
 
-        // قاموس برمي ذكي لترجمة وضبط الأسماء العربية المكسورة بناءً على ترتيب أسطر ملفك الثابت
-        const arabicFix = {
-            "القرية": "القرية الذكية",
-            "مدينة": "مدينة نصر",
-            "الدقي": "الدقي",
-            "قنا": "قنا",
-            "المهندسين": "المهندسين",
-            "الاجمالي": "الاجمالي",
-            "المجموع": "الاجمالي"
-        };
-
-        function fixArabicText(text, rowIndex) {
-            const clean = text.replace(/[^\u0600-\u06FF\s]/g, '').trim();
-            
-            // إصلاح الأسماء بناءً على الترتيب الفعلي لملف الإكسيل الخاص بك
-            if (rowIndex === 1) return "القرية الذكية";
-            if (rowIndex === 2) return "مدينة نصر";
-            if (rowIndex === 3) return "الدقي";
-            if (rowIndex === 4) return "قنا";
-            if (rowIndex === 5) return "المهندسين";
-            if (rowIndex === 6 || rowIndex === 13) return "الاجمالي";
-            
-            if (rowIndex === 8) return "القرية الذكية";
-            if (rowIndex === 9) return "مدينة نصر";
-            if (rowIndex === 10) return "الدقي";
-            if (rowIndex === 11) return "قنا";
-            if (rowIndex === 12) return "المهندسين";
-
-            return clean || text;
-        }
-
         window.onload = function() {
             fetch(FILE_URL)
                 .then(response => {
@@ -154,64 +115,97 @@
                     return response.text();
                 })
                 .then(text => {
-                    const extBody = document.getElementById('extinguishers-body');
-                    const hosesBody = document.getElementById('hoses-body');
-                    
-                    extBody.innerHTML = '';
-                    hosesBody.innerHTML = '';
-
                     const lines = text.split('\n');
+                    
+                    const thead1 = document.getElementById('thead-table1');
+                    const tbody1 = document.getElementById('tbody-table1');
+                    const thead2 = document.getElementById('thead-table2');
+                    const tbody2 = document.getElementById('tbody-table2');
+                    
+                    tbody1.innerHTML = '';
+                    tbody2.innerHTML = '';
+
                     let currentTable = 1;
-                    let validRowIndex = 0;
+                    let table1HeadersActive = false;
+                    let table2HeadersActive = false;
 
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i].trim();
                         
+                        // تخطي السطور الفارغة تمامًا
                         if (line === '' || line.replace(/\t/g, '') === '') continue;
 
-                        if (line.indexOf("رغوي") > -1 || line.includes("") && line.length < 50 && i > 6) {
-                            if(i > 6 && currentTable === 1) {
-                                currentTable = 2;
-                                continue;
-                            }
-                        }
-
-                        if (line.indexOf("الموقع") > -1 || (line.includes("") && i === 0)) continue;
-
+                        // التفكيك التلقائي بناءً على علامة الـ Tab الناتجة عن إكسيل
                         const columns = line.split(/\t+/);
                         if (columns.length < 2) continue;
 
-                        validRowIndex++;
-                        let location = fixArabicText(columns, validRowIndex);
-                        const tr = document.createElement('tr');
-                        
-                        if (location.includes("الاجمالي") || location.includes("المجموع")) {
-                            tr.classList.add('total-row');
+                        // التحول التلقائي للجدول الثاني عند رصد رأس جدول الخراطيم
+                        if (line.toLowerCase().indexOf("leather") > -1 || line.indexOf("الجلد") > -1) {
+                            currentTable = 2;
                         }
 
                         if (currentTable === 1) {
-                            let html = `<td>${location}</td>`;
-                            for (let j = 1; j < 8; j++) {
+                            // 1. بناء صف العناوين الأول ديناميكيًا بالكامل للجدول الأول
+                            if (!table1HeadersActive) {
+                                document.getElementById('title-table1').textContent = "🧯 أولاً: توزيع " + columns[0] + " وحمولاتها (سحب تلقائي للرأس)";
+                                let headerHtml = "<tr>";
+                                columns.forEach(headerText => {
+                                    headerHtml += `<th>${headerText.trim()}</th>`;
+                                });
+                                headerHtml += "</tr>";
+                                thead1.innerHTML = headerHtml;
+                                table1HeadersActive = true;
+                                continue;
+                            }
+
+                            // 2. بناء الأسطر الجانبية والبيانات للجدول الأول
+                            const tr = document.createElement('tr');
+                            if (columns[0].toLowerCase().includes("total") || columns[0].includes("اجمالي") || columns[0].includes("مجموع")) {
+                                tr.classList.add('total-row');
+                            }
+
+                            let rowHtml = `<td>${columns[0].trim()}</td>`; // العمود الجانبي (الموقع)
+                            for (let j = 1; j < columns.length; j++) {
                                 const val = columns[j] ? columns[j].trim() : '0';
                                 const isHighlighted = val !== '0' && val !== '-' && !isNaN(val);
-                                html += `<td class="${isHighlighted ? 'highlight-num' : ''}">${val}</td>`;
+                                rowHtml += `<td class="${isHighlighted ? 'highlight-num' : ''}">${val}</td>`;
                             }
-                            tr.innerHTML = html;
-                            extBody.appendChild(tr);
+                            tr.innerHTML = rowHtml;
+                            tbody1.appendChild(tr);
+
                         } else if (currentTable === 2) {
-                            let html = `<td>${location}</td>`;
-                            for (let j = 1; j < 4; j++) {
+                            // 3. بناء صف العناوين الأول ديناميكيًا بالكامل للجدول الثاني
+                            if (!table2HeadersActive) {
+                                document.getElementById('title-table2').textContent = "🪘 ثانياً: منظومة " + columns[0] + " ومواد الإطفاء (سحب تلقائي للرأس)";
+                                let headerHtml = "<tr>";
+                                columns.forEach(headerText => {
+                                    headerHtml += `<th>${headerText.trim()}</th>`;
+                                });
+                                headerHtml += "</tr>";
+                                thead2.innerHTML = headerHtml;
+                                table2HeadersActive = true;
+                                continue;
+                            }
+
+                            // 4. بناء الأسطر الجانبية والبيانات للجدول الثاني
+                            const tr = document.createElement('tr');
+                            if (columns[0].toLowerCase().includes("total") || columns[0].includes("اجمالي") || columns[0].includes("مجموع")) {
+                                tr.classList.add('total-row');
+                            }
+
+                            let rowHtml = `<td>${columns[0].trim()}</td>`; // العمود الجانبي (الموقع)
+                            for (let j = 1; j < columns.length; j++) {
                                 const val = columns[j] ? columns[j].trim() : '0';
                                 const isHighlighted = val !== '0' && val !== '-' && !isNaN(val);
-                                html += `<td class="${isHighlighted ? 'highlight-num' : ''}">${val}</td>`;
+                                rowHtml += `<td class="${isHighlighted ? 'highlight-num' : ''}">${val}</td>`;
                             }
-                            tr.innerHTML = html;
-                            hosesBody.appendChild(tr);
+                            tr.innerHTML = rowHtml;
+                            tbody2.appendChild(tr);
                         }
                     }
                 })
                 .catch(err => {
-                    document.getElementById('extinguishers-body').innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; font-weight: bold;">❌ فشل في معالجة النص العربي.</td></tr>`;
+                    document.getElementById('tbody-table1').innerHTML = `<tr><td style="text-align: center; color: #ef4444; font-weight: bold;">❌ فشل في جلب وتفكيك عناوين ملف البيانات.</td></tr>`;
                 });
         };
     </script>
