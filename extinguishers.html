@@ -6,7 +6,7 @@
     <title>إدارة طفايات وخراطيم الحريق</title>
     <style>
         :root {
-            --primary: #ef4444; /* اللون الأحمر المميز للحرائق والسلامة */
+            --primary: #ef4444; /* اللون الأحمر المخصص لإدارة السلامة ومكافحة الحريق */
             --bg-dark: #111827;
             --card-bg: #1f2937;
             --text-main: #f3f4f6;
@@ -53,9 +53,6 @@
             font-size: 18px;
             color: #f3f4f6;
             margin: 25px 0 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
             font-weight: bold;
         }
         .table-container { 
@@ -80,98 +77,108 @@
         <div class="header">
             <div>
                 <h2>🧯 إدارة طفايات وخراطيم الحريق</h2>
-                <p>لوحة السحب الديناميكي المباشر من ملفات جرد السلامة والأمن</p>
+                <p>لوحة العرض الفورية والإدارة المباشرة المدمجة للنظام</p>
             </div>
-            <a href="main.html" class="btn-back">⬅️ اللوحة الرئيسية</a>
+            <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
         </div>
 
-        <!-- جدول الطفايات -->
+        <!-- الجدول الأول: طفايات الحريق -->
         <div class="section-title">🧯 أولاً: توزيع طفايات الحريق وحمولاتها</div>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>الموقع</th><th>3ك</th><th>4ك</th><th>4.5ك</th><th>6ك</th><th>9ك</th><th>25ك</th><th>CO2</th>
+                        <th>الموقع</th>
+                        <th>3ك</th>
+                        <th>4ك</th>
+                        <th>4.5ك</th>
+                        <th>6ك</th>
+                        <th>9ك</th>
+                        <th>25ك</th>
+                        <th>CO2</th>
                     </tr>
                 </thead>
                 <tbody id="extinguishers-body">
-                    <tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب وتحليل بيانات الطفايات...</td></tr>
+                    <!-- سيتم حقن البيانات تلقائياً -->
                 </tbody>
             </table>
         </div>
 
-        <!-- جدول الخراطيم -->
+        <!-- الجدول الثاني: خراطيم الحريق -->
         <div class="section-title">🪘 ثانياً: منظومة خراطيم الحريق ومواد الإطفاء</div>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>الموقع</th><th>رغوي</th><th>الخراطيم الجلد</th><th>الخراطيم قماش</th>
+                        <th>الموقع</th>
+                        <th>رغوي</th>
+                        <th>الخراطيم الجلد</th>
+                        <th>الخراطيم قماش</th>
                     </tr>
                 </thead>
                 <tbody id="hoses-body">
-                    <tr><td colspan="4" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب وتحليل بيانات الخراطيم...</td></tr>
+                    <!-- سيتم حقن البيانات تلقائياً -->
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // سحب الملف النصي محلياً مع كسر الكاش الزمني لضمان التحديث اللحظي للبيانات
-        const FILE_URL = "extinguishers.txt?v=" + new Date().getTime();
+        // المصفوفة الأولى: بيانات طفايات الحريق الثابتة
+        const extinguishersData = [
+            { location: "القرية الذكية", c3: "0", c4: "0", c45: "140", c6: "59", c9: "0", c25: "1", co2: "3" },
+            { location: "مدينة نصر", c3: "10", c4: "0", c45: "12", c6: "126", c9: "2", c25: "1", co2: "0" },
+            { location: "الدقي", c3: "6", c4: "4", c45: "0", c6: "61", c9: "0", c25: "0", co2: "0" },
+            { location: "قنا", c3: "1", c4: "15", c45: "0", c6: "84", c9: "1", c25: "0", co2: "20" },
+            { location: "المهندسين", c3: "20", c4: "0", c45: "0", c6: "0", c9: "0", c25: "0", co2: "0" },
+            { location: "الاجمالي", c3: "37", c4: "19", c45: "152", c6: "330", c9: "3", c25: "2", co2: "23" }
+        ];
+
+        // المصفوفة الثانية: بيانات خراطيم الحريق الثابتة
+        const hosesData = [
+            { location: "القرية الذكية", foam: "2", leather: "49", fabric: "40" },
+            { location: "مدينة نصر", foam: "2", leather: "12", fabric: "8" },
+            { location: "الدقي", location: "الدقي", foam: "0", leather: "0", fabric: "0" },
+            { location: "قنا", foam: "4", leather: "6", fabric: "5" },
+            { location: "المهندسين", foam: "0", leather: "0", fabric: "1" },
+            { location: "الاجمالي", foam: "8", leather: "67", fabric: "54" }
+        ];
 
         window.onload = function() {
-            fetch(FILE_URL)
-                .then(response => {
-                    if (!response.ok) throw new Error("تعذر جلب ملف البيانات النصي.");
-                    return response.text();
-                })
-                .then(data => {
-                    // تقسيم الملف الكلي إلى مصفوفتين بناءً على سطر الفصل (-)
-                    const parts = data.split('\n-\n');
-                    if (parts.length < 2) return;
-
-                    // معالجة الجدول الأول (طفايات الحريق) -> يقرأ الجزء الأول (parts[0]) وعناصره 8 أعمدة
-                    buildTable(parts[0], 'extinguishers-body', 8);
-                    
-                    // معالجة الجدول الثاني (خراطيم الحريق) -> يقرأ الجزء الثاني (parts[1]) وعناصره 4 أعمدة
-                    buildTable(parts[1], 'hoses-body', 4);
-                })
-                .catch(err => {
-                    document.getElementById('extinguishers-body').innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; font-weight: bold;">❌ خطأ في السحب الرقمي للبيانات. تأكد من وجود ملف extinguishers.txt بنفس المجلد.</td></tr>`;
-                });
-        };
-
-        function buildTable(rawTableText, tbodyId, expectedColumns) {
-            const tbody = document.getElementById(tbodyId);
-            tbody.innerHTML = '';
-            
-            const lines = rawTableText.split('\n');
-            
-            // البدء من السطر رقم 1 لتخطي سطر العناوين الرئيسي لكل جدول
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (line === '') continue;
-
-                const columns = line.split(':');
-                if (columns.length < 2) continue;
-
+            // 1. بناء وحقن جدول طفايات الحريق ديناميكياً
+            const extBody = document.getElementById('extinguishers-body');
+            extinguishersData.forEach(row => {
                 const tr = document.createElement('tr');
-                if (columns[0].trim().indexOf("الاجمالي") > -1 || columns[0].trim().indexOf("المجموع") > -1) {
-                    tr.classList.add('total-row');
-                }
+                if (row.location === "الاجمالي") tr.classList.add('total-row');
 
-                let htmlContent = `<td>${columns[0].trim()}</td>`;
-                for (let j = 1; j < expectedColumns; j++) {
-                    const cellVal = columns[j] ? columns[j].trim() : '-';
-                    const hasValue = cellVal !== '0' && cellVal !== '-' && !isNaN(cellVal.replace(/[^0-9]/g, ''));
-                    htmlContent += `<td class="${hasValue ? 'highlight-num' : ''}">${cellVal}</td>`;
-                }
-                
-                tr.innerHTML = htmlContent;
-                tbody.appendChild(tr);
-            }
-        }
+                tr.innerHTML = `
+                    <td>${row.location}</td>
+                    <td class="${row.c3 !== '0' ? 'highlight-num' : ''}">${row.c3}</td>
+                    <td class="${row.c4 !== '0' ? 'highlight-num' : ''}">${row.c4}</td>
+                    <td class="${row.c45 !== '0' ? 'highlight-num' : ''}">${row.c45}</td>
+                    <td class="${row.c6 !== '0' ? 'highlight-num' : ''}">${row.c6}</td>
+                    <td class="${row.c9 !== '0' ? 'highlight-num' : ''}">${row.c9}</td>
+                    <td class="${row.c25 !== '0' ? 'highlight-num' : ''}">${row.c25}</td>
+                    <td class="${row.co2 !== '0' ? 'highlight-num' : ''}">${row.co2}</td>
+                `;
+                extBody.appendChild(tr);
+            });
+
+            // 2. بناء وحقن جدول خراطيم الحريق ديناميكياً
+            const hosesBody = document.getElementById('hoses-body');
+            hosesData.forEach(row => {
+                const tr = document.createElement('tr');
+                if (row.location === "الاجمالي") tr.classList.add('total-row');
+
+                tr.innerHTML = `
+                    <td>${row.location}</td>
+                    <td class="${row.foam !== '0' ? 'highlight-num' : ''}">${row.foam}</td>
+                    <td class="${row.leather !== '0' ? 'highlight-num' : ''}">${row.leather}</td>
+                    <td class="${row.fabric !== '0' ? 'highlight-num' : ''}">${row.fabric}</td>
+                `;
+                hosesBody.appendChild(tr);
+            });
+        };
     </script>
 </body>
 </html>
