@@ -6,7 +6,7 @@
     <title>إدارة طفايات وخراطيم الحريق</title>
     <style>
         :root {
-            --primary: #ef4444; /* اللون الأحمر المخصص لإدارة مكافحة الحريق والسلامة */
+            --primary: #ef4444;
             --bg-dark: #111827;
             --card-bg: #1f2937;
             --text-main: #f3f4f6;
@@ -82,7 +82,7 @@
             <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
         </div>
 
-        <!-- الجدول الأول: طفايات الحريق -->
+        <!-- الجدول الأول -->
         <div class="section-title">🧯 أولاً: توزيع طفايات الحريق وحمولاتها</div>
         <div class="table-container">
             <table>
@@ -92,12 +92,12 @@
                     </tr>
                 </thead>
                 <tbody id="extinguishers-body">
-                    <tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب وتحليل بيانات طفايات الحريق...</td></tr>
+                    <tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري جلب البيانات من ملف التكست السحابي...</td></tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- الجدول الثاني: خراطيم الحريق -->
+        <!-- الجدول الثاني -->
         <div class="section-title">🪘 ثانياً: منظومة خراطيم الحريق ومواد الإطفاء</div>
         <div class="table-container">
             <table>
@@ -107,21 +107,20 @@
                     </tr>
                 </thead>
                 <tbody id="hoses-body">
-                    <tr><td colspan="4" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب وتحليل بيانات الخراطيم...</td></tr>
+                    <tr><td colspan="4" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري جلب بيانات الخراطيم...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // الرابط الخام لملف التكست الخاص بك مع دمج دالة الوقت لتخطي حماية المتصفح والكاش اللحظي
-        const TARGET_URL = "https://raw.githubusercontent.com/F25583/security-app/refs/heads/main/Fire.extinguishers.txt";
-        const FILE_URL = "https://allorigins.win" + encodeURIComponent(TARGET_URL) + "&_v=" + new Date().getTime();
+        // استخدام اسم الملف المحلي المباشر لتلافي مشاكل الحظر والحماية نهائياً
+        const FILE_URL = "Fire.extinguishers.txt?v=" + new Date().getTime();
 
         window.onload = function() {
             fetch(FILE_URL)
                 .then(response => {
-                    if (!response.ok) throw new Error("تعذر جلب ملف البيانات النصي.");
+                    if (!response.ok) throw new Error("تعذر الوصول لملف التكست.");
                     return response.text();
                 })
                 .then(text => {
@@ -131,39 +130,33 @@
                     extBody.innerHTML = '';
                     hosesBody.innerHTML = '';
 
-                    // تقسيم الملف الكلي إلى أسطر بناءً على الـ New Line
                     const lines = text.split('\n');
-                    
-                    let currentTable = 1; // 1 لجدول الطفايات، 2 لجدول الخراطيم
+                    let currentTable = 1;
 
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i].trim();
                         
-                        // إذا وجدنا سطر العناوين الثاني نقوم بالتحول إلى جدول الخراطيم
+                        if (line === '' || line.replace(/\t/g, '') === '') continue;
+
                         if (line.indexOf("رغوي") > -1) {
                             currentTable = 2;
                             continue;
                         }
-                        
-                        // تخطي الأسطر الفارغة أو أسطر العناوين الأولية
-                        if (line === '' || line.indexOf("الموقع") > -1 || line.replace(/\t/g, '') === '') {
-                            continue;
-                        }
 
-                        // تقسيم السطر بناءً على مسافات الـ Tab المنتجة من إكسيل
+                        if (line.indexOf("الموقع") > -1) continue;
+
+                        // التفكيك بناءً على علامة الـ Tab الناتجة عن إكسيل
                         const columns = line.split(/\t+/);
                         if (columns.length < 2) continue;
 
                         const location = columns[0] ? columns[0].trim() : '-';
                         const tr = document.createElement('tr');
                         
-                        // تمييز أسطر المجاميع
                         if (location.indexOf("الاجمالي") > -1 || location.indexOf("المجموع") > -1) {
                             tr.classList.add('total-row');
                         }
 
                         if (currentTable === 1) {
-                            // تعبئة جدول طفايات الحريق (8 أعمدة متوقعة)
                             let html = `<td>${location}</td>`;
                             for (let j = 1; j < 8; j++) {
                                 const val = columns[j] ? columns[j].trim() : '0';
@@ -173,7 +166,6 @@
                             tr.innerHTML = html;
                             extBody.appendChild(tr);
                         } else if (currentTable === 2) {
-                            // تعبئة جدول خراطيم الحريق (4 أعمدة متوقعة)
                             let html = `<td>${location}</td>`;
                             for (let j = 1; j < 4; j++) {
                                 const val = columns[j] ? columns[j].trim() : '0';
@@ -186,8 +178,7 @@
                     }
                 })
                 .catch(err => {
-                    const errMsg = `<tr><td colspan="8" style="text-align: center; color: #ef4444; font-weight: bold;">❌ فشل في الاتصال بملف البيانات. تأكد من رفع ملف التكست بالاسم الصحيح.</td></tr>`;
-                    document.getElementById('extinguishers-body').innerHTML = errMsg;
+                    document.getElementById('extinguishers-body').innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; font-weight: bold;">❌ فشل في الاتصال بملف البيانات. تأكد من رفع ملف التكست باسم "Fire.extinguishers.txt" في نفس المجلد.</td></tr>`;
                 });
         };
     </script>
