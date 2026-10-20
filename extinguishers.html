@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة طفايات وخراطيم الحريق</title>
+    <style>
+        :root {
+            --primary: #ef4444; /* اللون الأحمر المميز للحرائق والسلامة */
+            --bg-dark: #111827;
+            --card-bg: #1f2937;
+            --text-main: #f3f4f6;
+            --border-color: #374151;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container { width: 100%; max-width: 950px; }
+        .header { 
+            background-color: var(--card-bg); 
+            padding: 18px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            border-right: 6px solid var(--primary); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .header h2 { margin: 0; font-size: 22px; color: var(--primary); font-weight: bold; }
+        .header p { margin: 4px 0 0 0; color: #9ca3af; font-size: 14px; }
+        .btn-back { 
+            background-color: #374151; 
+            color: white; 
+            border: none; 
+            padding: 10px 18px; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            font-size: 14px;
+        }
+        .section-title {
+            font-size: 18px;
+            color: #f3f4f6;
+            margin: 25px 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+        .table-container { 
+            background-color: var(--card-bg); 
+            border-radius: 12px; 
+            overflow-x: auto; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 700px; }
+        th, td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 15px; font-weight: 500; }
+        th { background-color: #2d3748; color: #fc8181; font-weight: bold; font-size: 14px; }
+        tr:hover { background-color: #2d3748; }
+        tr.total-row { background-color: #2d3748; font-weight: bold; border-top: 2px solid var(--primary); color: #fecaca; }
+        .highlight-num { color: #f59e0b; font-weight: bold; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h2>🧯 إدارة طفايات وخراطيم الحريق</h2>
+                <p>لوحة السحب الديناميكي المباشر من ملفات جرد السلامة والأمن</p>
+            </div>
+            <a href="main.html" class="btn-back">⬅️ اللوحة الرئيسية</a>
+        </div>
+
+        <!-- جدول الطفايات -->
+        <div class="section-title">🧯 أولاً: توزيع طفايات الحريق وحمولاتها</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الموقع</th><th>3ك</th><th>4ك</th><th>4.5ك</th><th>6ك</th><th>9ك</th><th>25ك</th><th>CO2</th>
+                    </tr>
+                </thead>
+                <tbody id="extinguishers-body">
+                    <tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب وتحليل بيانات الطفايات...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- جدول الخراطيم -->
+        <div class="section-title">🪘 ثانياً: منظومة خراطيم الحريق ومواد الإطفاء</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الموقع</th><th>رغوي</th><th>الخراطيم الجلد</th><th>الخراطيم قماش</th>
+                    </tr>
+                </thead>
+                <tbody id="hoses-body">
+                    <tr><td colspan="4" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب وتحليل بيانات الخراطيم...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // سحب الملف النصي محلياً مع كسر الكاش الزمني لضمان التحديث اللحظي للبيانات
+        const FILE_URL = "extinguishers.txt?v=" + new Date().getTime();
+
+        window.onload = function() {
+            fetch(FILE_URL)
+                .then(response => {
+                    if (!response.ok) throw new Error("تعذر جلب ملف البيانات النصي.");
+                    return response.text();
+                })
+                .then(data => {
+                    // تقسيم الملف الكلي إلى مصفوفتين بناءً على سطر الفصل (-)
+                    const parts = data.split('\n-\n');
+                    if (parts.length < 2) return;
+
+                    // معالجة الجدول الأول (طفايات الحريق) -> يقرأ الجزء الأول (parts[0]) وعناصره 8 أعمدة
+                    buildTable(parts[0], 'extinguishers-body', 8);
+                    
+                    // معالجة الجدول الثاني (خراطيم الحريق) -> يقرأ الجزء الثاني (parts[1]) وعناصره 4 أعمدة
+                    buildTable(parts[1], 'hoses-body', 4);
+                })
+                .catch(err => {
+                    document.getElementById('extinguishers-body').innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; font-weight: bold;">❌ خطأ في السحب الرقمي للبيانات. تأكد من وجود ملف extinguishers.txt بنفس المجلد.</td></tr>`;
+                });
+        };
+
+        function buildTable(rawTableText, tbodyId, expectedColumns) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+            
+            const lines = rawTableText.split('\n');
+            
+            // البدء من السطر رقم 1 لتخطي سطر العناوين الرئيسي لكل جدول
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line === '') continue;
+
+                const columns = line.split(':');
+                if (columns.length < 2) continue;
+
+                const tr = document.createElement('tr');
+                if (columns[0].trim().indexOf("الاجمالي") > -1 || columns[0].trim().indexOf("المجموع") > -1) {
+                    tr.classList.add('total-row');
+                }
+
+                let htmlContent = `<td>${columns[0].trim()}</td>`;
+                for (let j = 1; j < expectedColumns; j++) {
+                    const cellVal = columns[j] ? columns[j].trim() : '-';
+                    const hasValue = cellVal !== '0' && cellVal !== '-' && !isNaN(cellVal.replace(/[^0-9]/g, ''));
+                    htmlContent += `<td class="${hasValue ? 'highlight-num' : ''}">${cellVal}</td>`;
+                }
+                
+                tr.innerHTML = htmlContent;
+                tbody.appendChild(tr);
+            }
+        }
+    </script>
+</body>
+</html>
