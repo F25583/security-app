@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بيانات وأماكن الكاميرات</title>
+    <!-- مكتبة PapaParse الاحترافية لقراءة جداول الـ CSV -->
+    <script src="https://cloudflare.com"></script>
+    <style>
+        :root {
+            --primary: #10b981;
+            --bg-dark: #111827;
+            --card-bg: #1f2937;
+            --text-main: #f3f4f6;
+            --border-color: #374151;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container { width: 100%; max-width: 650px; }
+        .header { 
+            background-color: var(--card-bg); 
+            padding: 16px; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            border-right: 6px solid var(--primary); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .header h2 { margin: 0; font-size: 20px; color: var(--primary); font-weight: bold; }
+        .header p { margin: 4px 0 0 0; color: #9ca3af; font-size: 13px; }
+        .btn-back { 
+            background-color: #374151; 
+            color: white; 
+            border: none; 
+            padding: 8px 14px; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .btn-back:hover { background-color: #4b5563; }
+        
+        /* محرك البحث السريع داخل الموبايل */
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: white;
+            border-radius: 10px;
+            font-size: 15px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .search-box:focus { border-color: var(--primary); }
+
+        /* تنسيق الجداول لتناسب شاشة الهاتف بالكامل دون حاجة للتمرير الصعب */
+        .table-container { 
+            background-color: var(--card-bg); 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
+            border: 1px solid var(--border-color);
+        }
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th, td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 15px; }
+        th { background-color: #2d3748; color: var(--primary); font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #2d3748; }
+        
+        /* ميزة الخلايا الملونة لقراءة أسهل */
+        .highlight-num { color: #f59e0b; font-weight: bold; }
+        
+        .footer { text-align: center; margin-top: 25px; color: #6b7280; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- الرأس والتحكم -->
+        <div class="header">
+            <div>
+                <h2>📹 بيانات ومواقع الكاميرات</h2>
+                <p>متابعة أعداد الأنظمة وتوزيعها الجغرافي</p>
+            </div>
+            <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
+        </div>
+
+        <!-- خانة البحث الفوري للمدراء -->
+        <input type="text" id="search-input" class="search-box" onkeyup="filterTable()" placeholder="🔍 ابحث عن موقع، مبنى، أو نوع نظام...">
+
+        <!-- حاوية الجدول الرئيسي -->
+        <div class="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr id="table-header"></tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr><td style="text-align: center; color: #9ca3af; padding: 30px;">⏳ جاري قراءة وتحميل ملف البيانات...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">نظام المتابعة الأمنية الداخلي للموقع © 2026</div>
+    </div>
+
+    <script>
+        // الكود مربوط مباشرة بملف الإكسيل الجديد الخاص بك
+        const CSV_URL = "Camera Locations.csv";
+
+        window.onload = function() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    const fields = results.meta.fields;
+
+                    if (!fields || fields.length === 0) {
+                        showError();
+                        return;
+                    }
+
+                    // 1. إنشاء رؤوس الجدول المكتوبة في ملف الـ Excel الخاص بك
+                    const headerRow = document.getElementById('table-header');
+                    headerRow.innerHTML = '';
+                    fields.forEach(field => {
+                        const th = document.createElement('th');
+                        th.textContent = field;
+                        headerRow.appendChild(th);
+                    });
+
+                    // 2. تعبئة الصفوف وتنسيق الأرقام والكلمات لتظهر بشكل بارز
+                    const tableBody = document.getElementById('table-body');
+                    tableBody.innerHTML = '';
+                    data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        fields.forEach(field => {
+                            const td = document.createElement('td');
+                            let cellText = row[field] || '-';
+                            td.textContent = cellText;
+                            
+                            // تمييز الأرقام لإعطائها مظهر واضح واحترافي
+                            if(!isNaN(cellText) && cellText.trim() !== '') {
+                                td.classList.add('highlight-num');
+                            }
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    });
+                },
+                error: function(err) {
+                    showError();
+                }
+            });
+        };
+
+        // دالة الفلترة والبحث الذكي أثناء الكتابة من الموبايل
+        function filterTable() {
+            const input = document.getElementById("search-input").value.toLowerCase();
+            const rows = document.getElementById("table-body").getElementsByTagName("tr");
+            
+            for (let i = 0; i < rows.length; i++) {
+                let match = false;
+                const cells = rows[i].getElementsByTagName("td");
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j] && cells[j].textContent.toLowerCase().indexOf(input) > -1) {
+                        match = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = match ? "" : "none";
+            }
+        }
+
+        function showError() {
+            document.getElementById('table-body').innerHTML = 
+                `<tr><td colspan="100%" style="text-align: center; color: #ef4444; padding: 25px; font-weight:bold;">❌ عذراً، تعذر العثور على البيانات. تأكد من رفع ملف "Camera Locations.csv" إلى مستودع GitHub الخاص بك بنفس طريقة الرفع السابقة.</td></tr>`;
+        }
+    </script>
+</body>
+</html>
