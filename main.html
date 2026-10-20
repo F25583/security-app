@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - ملفات إدارة الأمن</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --bg-dark: #111827;
+            --card-bg: #1f2937;
+            --text-main: #f3f4f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #app-screen { width: 100%; max-width: 600px; padding: 20px; box-sizing: border-box; }
+        .header { background-color: var(--card-bg); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; border-right: 5px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .grid-item { 
+            background-color: var(--card-bg); 
+            padding: 30px 15px; 
+            border-radius: 12px; 
+            text-align: center; 
+            cursor: pointer; 
+            text-decoration: none;
+            color: var(--text-main);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #374151;
+        }
+        .grid-item:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+            border-color: var(--primary);
+        }
+        .icon { font-size: 45px; margin-bottom: 12px; }
+        .title { font-size: 16px; font-weight: bold; }
+        .footer { text-align: center; margin-top: 40px; color: #6b7280; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <div id="app-screen">
+        <div class="header">
+            <h2 style="margin: 0; color: var(--primary);">📋 لوحة التحكم - ملفات إدارة الأمن</h2>
+            <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">موقع المتابعة الفورية للأصول والبيانات</p>
+        </div>
+
+        <div class="grid-container">
+            <!-- زر الكاميرات الموجه لصفحة جدول الكاميرات الاحترافي -->
+            <a href="cameras.html" class="grid-item">
+                <div class="icon">📹</div>
+                <div class="title">أماكن وأعداد الكاميرات</div>
+            </a>
+
+            <div class="grid-item" style="opacity: 0.5; cursor: not-allowed;">
+                <div class="icon">🧯</div>
+                <div class="title">طفايات الحريق (قريباً)</div>
+            </div>
+
+            <div class="grid-item" style="opacity: 0.5; cursor: not-allowed;">
+                <div class="icon">👥</div>
+                <div class="title">أعداد الموظفين (قريباً)</div>
+            </div>
+
+            <div class="grid-item" style="opacity: 0.5; cursor: not-allowed;">
+                <div class="icon">🚪</div>
+                <div class="title">مخارج الطوارئ (قريباً)</div>
+            </div>
+        </div>
+        
+        <div class="footer">جميع الحقوق محفوظة لإدارة الأمن © 2026</div>
+    </div>
+
+</body>
+</html>
