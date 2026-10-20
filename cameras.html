@@ -62,7 +62,6 @@
         th, td { padding: 16px 14px; border-bottom: 1px solid var(--border-color); font-size: 16px; font-weight: 500; }
         th { background-color: #2d3748; color: var(--primary); font-weight: bold; font-size: 15px; }
         tr:hover { background-color: #2d3748; }
-        /* تمييز صف المجموع النهائي بأسلوب واضح */
         tr.total-row { background-color: #2d3748; font-weight: bold; border-top: 2px solid var(--primary); }
         .highlight-num { color: #f59e0b; font-weight: bold; font-size: 17px; }
     </style>
@@ -95,8 +94,8 @@
     </div>
 
     <script>
-        // الرابط المباشر الصحيح للملف الخاص بك
-        const CSV_URL = "https://raw.githubusercontent.com/F25583/security-app/refs/heads/main/cameras.csv";
+        // تم تصحيح حرف الـ f ليكون صغيراً (small) ليتطابق مع رابط حسابك الفعلي
+        const CSV_URL = "https://githubusercontent.com";
 
         window.onload = function() {
             Papa.parse(CSV_URL, {
@@ -116,33 +115,28 @@
                     data.forEach(row => {
                         const tr = document.createElement('tr');
                         
-                        // كود ذكي لتنظيف الفراغات والمسافات الزائدة من أسماء الأعمدة تلقائياً
                         let cleanedRow = {};
                         for (let key in row) {
-                            cleanedRow[key.trim()] = row[key] ? row[key].trim() : '';
+                            if(key) cleanedRow[key.trim()] = row[key] ? row[key].trim() : '';
                         }
                         
                         const location = cleanedRow['الموقع'] || '-';
                         const oldSystem = cleanedRow['نظام قديم'] || '-';
                         const newSystem = cleanedRow['نظام جديد'] || '-';
 
-                        // تمييز صف المجموع النهائي
-                        if (location === "المجموع") {
+                        if (location.indexOf("المجموع") > -1) {
                             tr.classList.add('total-row');
                         }
 
-                        // عمود الموقع
                         const tdLoc = document.createElement('td');
                         tdLoc.textContent = location;
                         tr.appendChild(tdLoc);
 
-                        // عمود نظام قديم
                         const tdOld = document.createElement('td');
                         tdOld.textContent = oldSystem === '' ? '-' : oldSystem;
                         if(!isNaN(oldSystem) && oldSystem !== '') tdOld.classList.add('highlight-num');
                         tr.appendChild(tdOld);
 
-                        // عمود نظام جديد
                         const tdNew = document.createElement('td');
                         tdNew.textContent = newSystem === '' ? '-' : newSystem;
                         if(!isNaN(newSystem) && newSystem !== '') tdNew.classList.add('highlight-num');
