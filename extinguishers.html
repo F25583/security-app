@@ -77,7 +77,7 @@
         <div class="header">
             <div>
                 <h2>🧯 إدارة طفايات وخراطيم الحريق</h2>
-                <p>لوحة العرض الفورية والإدارة المباشرة المدمجة للنظام</p>
+                <p>لوحة السحب المباشر والديناميكي الفوري من ملفات جرد السلامة والأمن</p>
             </div>
             <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
         </div>
@@ -88,18 +88,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th>الموقع</th>
-                        <th>3ك</th>
-                        <th>4ك</th>
-                        <th>4.5ك</th>
-                        <th>6ك</th>
-                        <th>9ك</th>
-                        <th>25ك</th>
-                        <th>CO2</th>
+                        <th>الموقع</th><th>3ك</th><th>4ك</th><th>4.5ك</th><th>6ك</th><th>9ك</th><th>25ك</th><th>CO2</th>
                     </tr>
                 </thead>
                 <tbody id="extinguishers-body">
-                    <!-- سيتم حقن جدول البيانات هنا تلقائياً فورا -->
+                    <tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب وتحليل بيانات طفايات الحريق...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -110,76 +103,92 @@
             <table>
                 <thead>
                     <tr>
-                        <th>الموقع</th>
-                        <th>رغوي</th>
-                        <th>الخراطيم الجلد</th>
-                        <th>الخراطيم قماش</th>
+                        <th>الموقع</th><th>رغوي</th><th>الخراطيم الجلد</th><th>الخراطيم قماش</th>
                     </tr>
                 </thead>
                 <tbody id="hoses-body">
-                    <!-- سيتم حقن جدول البيانات هنا تلقائياً فورا -->
+                    <tr><td colspan="4" style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب وتحليل بيانات الخراطيم...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // المصفوفة الأولى: بيانات طفايات الحريق المأخوذة من ملف الإحصاء الخاص بك
-        const extinguishersData = [
-            { location: "القرية الذكية", c3: "0", c4: "0", c45: "140", c6: "59", c9: "0", c25: "1", co2: "3" },
-            { location: "مدينة نصر", c3: "10", c4: "0", c45: "12", c6: "126", c9: "2", c25: "1", co2: "0" },
-            { location: "الدقي", c3: "6", c4: "4", c45: "0", c6: "61", c9: "0", c25: "0", co2: "0" },
-            { location: "قنا", c3: "1", c4: "15", c45: "0", c6: "84", c9: "1", c25: "0", co2: "20" },
-            { location: "المهندسين", c3: "20", c4: "0", c45: "0", c6: "0", c9: "0", c25: "0", co2: "0" },
-            { location: "الاجمالي", c3: "37", c4: "19", c45: "152", c6: "330", c9: "3", c25: "2", co2: "23" }
-        ];
-
-        // المصفوفة الثانية: بيانات خراطيم الحريق من نفس الملف النصي
-        const hosesData = [
-            { location: "القرية الذكية", foam: "2", leather: "49", fabric: "40" },
-            { location: "مدينة نصر", foam: "2", leather: "12", fabric: "8" },
-            { location: "الدقي", foam: "0", leather: "0", fabric: "0" },
-            { location: "قنا", foam: "4", leather: "6", fabric: "5" },
-            { location: "المهندسين", foam: "0", leather: "0", fabric: "1" },
-            { location: "الاجمالي", foam: "8", leather: "67", fabric: "54" }
-        ];
+        // الرابط الخام لملف التكست الخاص بك مع دمج دالة الوقت لتخطي حماية المتصفح والكاش اللحظي
+        const TARGET_URL = "https://raw.githubusercontent.com/F25583/security-app/refs/heads/main/Fire.extinguishers.txt";
+        const FILE_URL = "https://allorigins.win" + encodeURIComponent(TARGET_URL) + "&_v=" + new Date().getTime();
 
         window.onload = function() {
-            // 1. بناء وحقن جدول طفايات الحريق
-            const extBody = document.getElementById('extinguishers-body');
-            extBody.innerHTML = '';
-            extinguishersData.forEach(row => {
-                const tr = document.createElement('tr');
-                if (row.location === "الاجمالي") tr.classList.add('total-row');
+            fetch(FILE_URL)
+                .then(response => {
+                    if (!response.ok) throw new Error("تعذر جلب ملف البيانات النصي.");
+                    return response.text();
+                })
+                .then(text => {
+                    const extBody = document.getElementById('extinguishers-body');
+                    const hosesBody = document.getElementById('hoses-body');
+                    
+                    extBody.innerHTML = '';
+                    hosesBody.innerHTML = '';
 
-                tr.innerHTML = `
-                    <td>${row.location}</td>
-                    <td class="${row.c3 !== '0' ? 'highlight-num' : ''}">${row.c3}</td>
-                    <td class="${row.c4 !== '0' ? 'highlight-num' : ''}">${row.c4}</td>
-                    <td class="${row.c45 !== '0' ? 'highlight-num' : ''}">${row.c45}</td>
-                    <td class="${row.c6 !== '0' ? 'highlight-num' : ''}">${row.c6}</td>
-                    <td class="${row.c9 !== '0' ? 'highlight-num' : ''}">${row.c9}</td>
-                    <td class="${row.c25 !== '0' ? 'highlight-num' : ''}">${row.c25}</td>
-                    <td class="${row.co2 !== '0' ? 'highlight-num' : ''}">${row.co2}</td>
-                `;
-                extBody.appendChild(tr);
-            });
+                    // تقسيم الملف الكلي إلى أسطر بناءً على الـ New Line
+                    const lines = text.split('\n');
+                    
+                    let currentTable = 1; // 1 لجدول الطفايات، 2 لجدول الخراطيم
 
-            // 2. بناء وحقن جدول خراطيم الحريق
-            const hosesBody = document.getElementById('hoses-body');
-            hosesBody.innerHTML = '';
-            hosesData.forEach(row => {
-                const tr = document.createElement('tr');
-                if (row.location === "الاجمالي") tr.classList.add('total-row');
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        
+                        // إذا وجدنا سطر العناوين الثاني نقوم بالتحول إلى جدول الخراطيم
+                        if (line.indexOf("رغوي") > -1) {
+                            currentTable = 2;
+                            continue;
+                        }
+                        
+                        // تخطي الأسطر الفارغة أو أسطر العناوين الأولية
+                        if (line === '' || line.indexOf("الموقع") > -1 || line.replace(/\t/g, '') === '') {
+                            continue;
+                        }
 
-                tr.innerHTML = `
-                    <td>${row.location}</td>
-                    <td class="${row.foam !== '0' ? 'highlight-num' : ''}">${row.foam}</td>
-                    <td class="${row.leather !== '0' ? 'highlight-num' : ''}">${row.leather}</td>
-                    <td class="${row.fabric !== '0' ? 'highlight-num' : ''}">${row.fabric}</td>
-                `;
-                hosesBody.appendChild(tr);
-            });
+                        // تقسيم السطر بناءً على مسافات الـ Tab المنتجة من إكسيل
+                        const columns = line.split(/\t+/);
+                        if (columns.length < 2) continue;
+
+                        const location = columns[0] ? columns[0].trim() : '-';
+                        const tr = document.createElement('tr');
+                        
+                        // تمييز أسطر المجاميع
+                        if (location.indexOf("الاجمالي") > -1 || location.indexOf("المجموع") > -1) {
+                            tr.classList.add('total-row');
+                        }
+
+                        if (currentTable === 1) {
+                            // تعبئة جدول طفايات الحريق (8 أعمدة متوقعة)
+                            let html = `<td>${location}</td>`;
+                            for (let j = 1; j < 8; j++) {
+                                const val = columns[j] ? columns[j].trim() : '0';
+                                const isHighlighted = val !== '0' && val !== '-' && !isNaN(val);
+                                html += `<td class="${isHighlighted ? 'highlight-num' : ''}">${val}</td>`;
+                            }
+                            tr.innerHTML = html;
+                            extBody.appendChild(tr);
+                        } else if (currentTable === 2) {
+                            // تعبئة جدول خراطيم الحريق (4 أعمدة متوقعة)
+                            let html = `<td>${location}</td>`;
+                            for (let j = 1; j < 4; j++) {
+                                const val = columns[j] ? columns[j].trim() : '0';
+                                const isHighlighted = val !== '0' && val !== '-' && !isNaN(val);
+                                html += `<td class="${isHighlighted ? 'highlight-num' : ''}">${val}</td>`;
+                            }
+                            tr.innerHTML = html;
+                            hosesBody.appendChild(tr);
+                        }
+                    }
+                })
+                .catch(err => {
+                    const errMsg = `<tr><td colspan="8" style="text-align: center; color: #ef4444; font-weight: bold;">❌ فشل في الاتصال بملف البيانات. تأكد من رفع ملف التكست بالاسم الصحيح.</td></tr>`;
+                    document.getElementById('extinguishers-body').innerHTML = errMsg;
+                });
         };
     </script>
 </body>
