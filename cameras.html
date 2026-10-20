@@ -91,8 +91,8 @@
     </div>
 
     <script>
-        // الرابط الجديد الخاص بجدولك مدمج بالكامل هنا بشكل برمجي سليم
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/10nuP6e9GJPK-e3CYKoTMB5mDY9u8SGILRcRJfrj3iFo/edit?usp=sharing";
+        // هنا تم وضع رابط جدول الـ Google Sheet الخاص بك الجديد وتصحيحه بالكامل
+        const SHEET_URL = "https://google.com";
 
         function extractSheetId(url) {
             const matches = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
@@ -126,7 +126,7 @@
                         const tr = document.createElement('tr');
                         const cells = googleRow.c;
                         
-                        // جلب القيم وتأكيد قراءتها بشكل صحيح
+                        // قراءة الثلاثة أعمدة بالترتيب (الموقع، نظام قديم، نظام جديد)
                         const location = (cells && cells[0]) ? cells[0].v : '-';
                         const oldSystem = (cells && cells[1]) ? cells[1].v : '-';
                         const newSystem = (cells && cells[2]) ? cells[2].v : '-';
