@@ -4,60 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بيانات وأماكن الكاميرات</title>
-    <!-- استدعاء مكتبة PapaParse الرسمية لقراءة جدول الـ CSV -->
     <script src="https://cloudflare.com"></script>
     <style>
-        :root {
-            --primary: #10b981;
-            --bg-dark: #111827;
-            --card-bg: #1f2937;
-            --text-main: #f3f4f6;
-            --border-color: #374151;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
+        :root { --primary: #10b981; --bg-dark: #111827; --card-bg: #1f2937; --text-main: #f3f4f6; --border-color: #374151; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
         .container { width: 100%; max-width: 850px; }
-        .header { 
-            background-color: var(--card-bg); 
-            padding: 18px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            border-right: 6px solid var(--primary); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+        .header { background-color: var(--card-bg); padding: 18px; border-radius: 12px; margin-bottom: 20px; border-right: 6px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .header h2 { margin: 0; font-size: 22px; color: var(--primary); font-weight: bold; }
         .header p { margin: 4px 0 0 0; color: #9ca3af; font-size: 14px; }
-        .btn-back { 
-            background-color: #374151; 
-            color: white; 
-            border: none; 
-            padding: 10px 18px; 
-            font-weight: bold; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            text-decoration: none; 
-            font-size: 14px;
-        }
-        .table-container { 
-            background-color: var(--card-bg); 
-            border-radius: 12px; 
-            overflow-x: auto; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
-            border: 1px solid var(--border-color);
-        }
+        .btn-back { background-color: #374151; color: white; border: none; padding: 10px 18px; font-weight: bold; border-radius: 8px; cursor: pointer; text-decoration: none; font-size: 14px; }
+        .table-container { background-color: var(--card-bg); border-radius: 12px; overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid var(--border-color); }
         table { width: 100%; border-collapse: collapse; text-align: right; min-width: 600px; }
         th, td { padding: 16px 14px; border-bottom: 1px solid var(--border-color); font-size: 16px; font-weight: 500; }
         th { background-color: #2d3748; color: var(--primary); font-weight: bold; font-size: 15px; }
@@ -67,7 +23,6 @@
     </style>
 </head>
 <body>
-
     <div class="container">
         <div class="header">
             <div>
@@ -76,7 +31,6 @@
             </div>
             <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
         </div>
-
         <div class="table-container">
             <table id="data-table">
                 <thead>
@@ -92,11 +46,8 @@
             </table>
         </div>
     </div>
-
     <script>
-        // إلغاء الحماية والكاش نهائياً عن طريق إضافة توقيت متغير لا يتكرر لاسم الملف الإضافي
         const CSV_URL = "cameras.csv?v=" + new Date().getTime();
-
         window.onload = function() {
             Papa.parse(CSV_URL, {
                 download: true,
@@ -106,59 +57,36 @@
                     const data = results.data;
                     const tableBody = document.getElementById('table-body');
                     tableBody.innerHTML = '';
-
                     if (!data || data.length <= 1) {
                         showError("الملف فارغ أو لا يحتوي على سطور بيانات كافية.");
                         return;
                     }
-
-                    // قراءة أسطر البيانات مع تجاوز سطر العناوين الأول
                     for (let i = 1; i < data.length; i++) {
                         const row = data[i];
-                        if (!row || row.length < 1) continue;
+                        if (!row || row.length < 3) continue;
 
                         const tr = document.createElement('tr');
-                        
-                        // استخراج الأعمدة بالترتيب الفعلي
                         const location = row[0] ? row[0].trim() : '-';
                         const oldSystem = row[1] ? row[1].trim() : '-';
                         const newSystem = row[2] ? row[2].trim() : '-';
 
-                        // تمييز السطر إذا كان يمثل المجموع النهائي لإبراز الشكل الإحصائي
-                        if (location.indexOf("المجموع") > -1) {
-                            tr.classList.add('total-row');
-                        }
+                        if (location.indexOf("المجموع") > -1) { tr.classList.add('total-row'); }
 
-                        // إنشاء وعرض عمود الموقع
-                        const tdLoc = document.createElement('td');
-                        tdLoc.textContent = location;
-                        tr.appendChild(tdLoc);
-
-                        // إنشاء وعرض عمود نظام قديم
-                        const tdOld = document.createElement('td');
-                        tdOld.textContent = oldSystem === '' ? '-' : oldSystem;
+                        const tdLoc = document.createElement('td'); tdLoc.textContent = location; tr.appendChild(tdLoc);
+                        const tdOld = document.createElement('td'); tdOld.textContent = oldSystem === '' ? '-' : oldSystem;
                         if(!isNaN(oldSystem) && oldSystem !== '') tdOld.classList.add('highlight-num');
                         tr.appendChild(tdOld);
-
-                        // إنشاء وعرض عمود نظام جديد
-                        const tdNew = document.createElement('td');
-                        tdNew.textContent = newSystem === '' ? '-' : newSystem;
+                        const tdNew = document.createElement('td'); tdNew.textContent = newSystem === '' ? '-' : newSystem;
                         if(!isNaN(newSystem) && newSystem !== '') tdNew.classList.add('highlight-num');
                         tr.appendChild(tdNew);
 
                         tableBody.appendChild(tr);
                     }
                 },
-                error: function(err) {
-                    showError("تعذر الاتصال بملف البيانات السحابي. تأكد من سلامة الرابط.");
-                }
+                error: function(err) { showError("تعذر الاتصال بملف البيانات. تأكد من وجود ملف cameras.csv بجانب صفحة الويب بنفس المجلد."); }
             });
         };
-
-        function showError(msg) {
-            document.getElementById('table-body').innerHTML = 
-                `<tr><td colspan="3" style="text-align: center; color: #ef4444; padding: 25px; font-weight:bold;">❌ ${msg}</td></tr>`;
-        }
+        function showError(msg) { document.getElementById('table-body').innerHTML = `<tr><td colspan="3" style="text-align: center; color: #ef4444; padding: 25px; font-weight:bold;">❌ ${msg}</td></tr>`; }
     </script>
 </body>
 </html>
