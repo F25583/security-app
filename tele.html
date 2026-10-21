@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل هواتف أفايا - إدارة الأمن</title>
+    <style>
+        :root {
+            --primary: #cc0000; /* اللون الأحمر الرسمي لأفايا */
+            --bg-dark: #111827;
+            --card-bg: #1f2937;
+            --text-main: #f3f4f6;
+            --border-color: #374151;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container { width: 100%; max-width: 950px; }
+        .header { 
+            background-color: var(--card-bg); 
+            padding: 18px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            border-right: 6px solid var(--primary); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .header h2 { margin: 0; font-size: 22px; color: var(--primary); font-weight: bold; }
+        .header p { margin: 4px 0 0 0; color: #9ca3af; font-size: 14px; }
+        .btn-back { 
+            background-color: #374151; 
+            color: white; 
+            border: none; 
+            padding: 10px 18px; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            font-size: 14px;
+        }
+        .section-title {
+            font-size: 18px;
+            color: #f3f4f6;
+            margin: 25px 0 12px 0;
+            font-weight: bold;
+        }
+        .table-container { 
+            background-color: var(--card-bg); 
+            border-radius: 12px; 
+            overflow-x: auto; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 600px; }
+        th, td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 15px; font-weight: 500; }
+        th { background-color: #2d3748; color: #feb2b2; font-weight: bold; font-size: 14px; }
+        tr:hover { background-color: #2d3748; }
+        tr.total-row { background-color: #2d3748; font-weight: bold; border-top: 2px solid var(--primary); color: #ffcccc; }
+        .highlight-num { color: #f59e0b; font-weight: bold; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h2>☎️ دليل هواتف أفايا (Avaya)</h2>
+                <p>قائمة خطوط الهواتف الداخلية والتوزيع الفوري للأقسام</p>
+            </div>
+            <a href="main.html" class="btn-back">⬅️ الرئيسية</a>
+        </div>
+
+        <!-- جدول الهواتف والدليل -->
+        <div class="section-title" id="title-table">⏳ جاري قراءة عنوان الجدول وسحب البيانات...</div>
+        <div class="table-container">
+            <table id="tele-table">
+                <thead id="thead-tele"></thead>
+                <tbody id="tbody-tele">
+                    <tr><td style="text-align: center; color: #9ca3af; padding: 20px;">⏳ جاري سحب البيانات من دليل الهواتف...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // استدعاء ملف النص الخاص بالهواتف مع منع التخزين المؤقت لقراءة البيانات اللحظية
+        const FILE_URL = "tele.txt?v=" + new Date().getTime();
+
+        window.onload = function() {
+            fetch(FILE_URL)
+                .then(response => {
+                    if (!response.ok) throw new Error("تعذر الوصول لملف الهواتف tele.txt.");
+                    return response.text();
+                })
+                .then(text => {
+                    const lines = text.split('\n');
+                    
+                    const thead = document.getElementById('thead-tele');
+                    const tbody = document.getElementById('tbody-tele');
+                    
+                    tbody.innerHTML = '';
+                    let headersActive = false;
+
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        
+                        // تخطي السطور الفارغة تماماً
+                        if (line === '' || line.replace(/\t/g, '') === '') continue;
+
+                        // التفكيك التلقائي بناءً على علامة الـ Tab الناتجة عن إكسيل
+                        const columns = line.split(/\t+/);
+                        if (columns.length < 2) continue;
+
+                        // 1. بناء صف الرؤوس الأول ديناميكيًا بالكامل بناءً على أول سطر مكتوب بالملف
+                        if (!headersActive) {
+                            document.getElementById('title-table').textContent = "📱 دليل أرقام " + columns[0] + " وتوزيع الأقسام";
+                            let headerHtml = "<tr>";
+                            columns.forEach(headerText => {
+                                headerHtml += `<th>${headerText.trim()}</th>`;
+                            });
+                            headerHtml += "</tr>";
+                            thead.innerHTML = headerHtml;
+                            headersActive = true;
+                            continue;
+                        }
+
+                        // 2. بناء الأسطر والبيانات التفصيلية للهواتف
+                        const tr = document.createElement('tr');
+                        
+                        // رصد صفوف الإجماليات أو المجموع لتغيير مظهرها تلقائياً
+                        if (columns[0].toLowerCase().includes("total") || columns[0].includes("اجمالي") || columns[0].includes("مجموع")) {
+                            tr.classList.add('total-row');
+                        }
+
+                        let rowHtml = `<td>${columns[0].trim()}</td>`; // العمود الأول (اسم القسم / الموظف)
+                        for (let j = 1; j < columns.length; j++) {
+                            const val = columns[j] ? columns[j].trim() : '-';
+                            // تمييز الأرقام الداخلية بألوان واضحة
+                            const isNumbered = val !== '' && val !== '-' && !isNaN(val.replace(/-|\s/g, ''));
+                            rowHtml += `<td class="${isNumbered ? 'highlight-num' : ''}">${val}</td>`;
+                        }
+                        tr.innerHTML = rowHtml;
+                        tbody.appendChild(tr);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    document.getElementById('tbody-tele').innerHTML = 
+                        `<tr><td style="text-align: center; color: #ef4444; padding: 20px;">❌ خطأ: لم يتم العثور على ملف tele.txt في نفس المجلد أو الملف فارغ.</td></tr>`;
+                });
+        };
+    </script>
+
+</body>
+</html>
