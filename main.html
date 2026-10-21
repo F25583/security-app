@@ -10,6 +10,7 @@
             --bg-dark: #111827;
             --card-bg: #1f2937;
             --text-main: #f3f4f6;
+            --avaya-red: #cc0000; /* اللون الأحمر الرسمي لأفايا */
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -47,7 +48,42 @@
             box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
             border-color: var(--primary);
         }
+        /* تأثير الحوم المخصص لزر أفايا باللون الأحمر */
+        .grid-item.avaya-btn:hover {
+            box-shadow: 0 6px 15px rgba(204, 0, 0, 0.4);
+            border-color: var(--avaya-red);
+        }
         .icon { font-size: 45px; margin-bottom: 12px; }
+        
+        /* تصميم أيقونة أفايا تجمع بين رمز الهاتف والحرف */
+        .avaya-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 65px;
+            height: 65px;
+            margin-bottom: 12px;
+        }
+        .avaya-phone-icon {
+            font-size: 40px;
+            color: var(--avaya-red);
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+        }
+        .avaya-badge {
+            position: absolute;
+            bottom: -2px;
+            left: -2px;
+            background-color: var(--avaya-red);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            padding: 2px 6px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+        }
+
         .title { font-size: 16px; font-weight: bold; }
         .footer { text-align: center; margin-top: 40px; color: #6b7280; font-size: 12px; }
     </style>
@@ -67,7 +103,16 @@
                 <div class="title">أماكن وأعداد الكاميرات</div>
             </a>
 
-            <!-- تم التفعيل والربط النهائي ليعمل مثل زر الكاميرات تماماً -->
+            <!-- زر روابط الإدارة المطور يحمل شعار الهاتف المميز بشارة أفايا -->
+            <a href="avaya-links.html" class="grid-item avaya-btn">
+                <div class="avaya-box">
+                    <div class="avaya-phone-icon">☎️</div>
+                    <div class="avaya-badge">AVAYA</div>
+                </div>
+                <div class="title">روابط الإدارة (Avaya)</div>
+            </a>
+
+            <!-- زر طفايات وخراطيم الحريق -->
             <a href="extinguishers.html" class="grid-item">
                 <div class="icon">🧯</div>
                 <div class="title">طفايات وخراطيم الحريق</div>
