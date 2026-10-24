@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسكين إدارة الأمن - القرية الذكية</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --bg-dark: #111827;
+            --card-bg: #1f2937;
+            --text-main: #f3f4f6;
+            --accent: #3b82f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+        .container { width: 100%; max-width: 1000px; margin: 0 auto; }
+        .back-btn {
+            display: inline-block;
+            background-color: #374151;
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px solid #4b5563;
+            transition: background 0.2s;
+        }
+        .back-btn:hover { background-color: #4b5563; }
+        .header { background-color: var(--card-bg); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; border-right: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        
+        .table-container { overflow-x: auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-top: 20px; border: 1px solid #374151; }
+        table { width: 100%; border-collapse: collapse; text-align: center; }
+        th, td { padding: 14px; border: 1px solid #374151; white-space: nowrap; }
+        th { background-color: #2d3748; color: #fff; font-weight: bold; }
+        tr:nth-child(even) { background-color: #1a202c; }
+        tr:hover { background-color: rgba(59, 130, 246, 0.1); }
+        .loading { text-align: center; padding: 30px; color: #9ca3af; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="main.html" class="back-btn">⬅️ العودة للوحة التحكم</a>
+    
+    <div class="header">
+        <h2 style="margin: 0; color: var(--accent);">🏢 ملف التسكين وجرد الغرف - القرية الذكية</h2>
+        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">عرض تلقائي ومحدث فورياً من جدول البيانات</p>
+    </div>
+
+    <div class="table-container">
+        <div id="loading-msg" class="loading">جاري جلب بيانات التسكين الحالية...</div>
+        <table id="data-table" style="display:none;">
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const csvURL = "https://google.com";
+
+fetch(csvURL)
+  .then(response => response.text())
+  .then(text => {
+    let rows = text.split("\n");
+    let tableHead = document.getElementById("table-head");
+    let tableBody = document.getElementById("table-body");
+    
+    let isFirstRow = true;
+
+    rows.forEach((row) => {
+      if (row.trim() === "") return;
+      
+      let columns = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(",");
+      let rowHtml = "<tr>";
+      
+      columns.forEach(col => {
+        let cleanText = col.replace(/^"|"$/g, '').trim();
+        if(isFirstRow) {
+          rowHtml += `<th>${cleanText}</th>`;
+        } else {
+          rowHtml += `<td>${cleanText}</td>`;
+        }
+      });
+      
+      rowHtml += "</tr>";
+      if(isFirstRow) {
+        tableHead.innerHTML = rowHtml;
+        isFirstRow = false;
+      } else {
+        tableBody.innerHTML += rowHtml;
+      }
+    });
+
+    document.getElementById("loading-msg").style.display = "none";
+    document.getElementById("data-table").style.display = "table";
+  })
+  .catch(error => {
+    console.error("خطأ أثناء معالجة البيانات:", error);
+    document.getElementById("loading-msg").innerText = "فشل تحميل جدول التسكين، يرجى التحقق من اتصال الإنترنت.";
+  });
+</script>
+
+</body>
+</html>
