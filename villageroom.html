@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسكين إدارة الأمن - القرية الذكية</title>
-    <!-- استدعاء مكتبة PapaParse لحل مشاكل الامان وقراءة ملفات جوجل شيت بنجاح -->
-    <script src="https://cloudflare.com"></script>
     <style>
         :root {
             --primary: #10b981;
@@ -53,63 +51,52 @@
     
     <div class="header">
         <h2 style="margin: 0; color: var(--accent);">🏢 ملف التسكين وجرد الغرف - القرية الذكية</h2>
-        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">عرض تلقائي ومحدث فورياً من جدول البيانات</p>
+        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">عرض تلقائي ومحدث فورياً عبر سيرفر Google Script</p>
     </div>
 
     <div class="table-container">
-        <div id="loading-msg" class="loading">جاري جلب بيانات التسكين الحالية...</div>
+        <div id="loading-msg" class="loading">جاري سحب جداول البيانات وفك الحماية الحالية...</div>
         <table id="data-table" style="display:none;">
-            <thead id="table-head"></thead>
+            <thead>
+                <tr>
+                    <th>Room Number</th>
+                    <th>Name</th>
+                    <th>Job Title</th>
+                </tr>
+            </thead>
             <tbody id="table-body"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-// الرابط المطور والمباشر بسحب كود جدولك الفعلي حصرياً
-const csvURL = "https://google.com";
+// الرابط المباشر والسحري الذي استخرجته من جوجل شيت بنجاح
+const apiURL = "https://script.google.com/macros/s/AKfycbw9elCICxsseSwcR4NvO2q8KtxWfszLVkZRJZRhAz-fmO4gcwUKlylRROESSeZrz6Fn/exec";
 
-// تشغيل القارئ الذكي للبيانات
-Papa.parse(csvURL, {
-    download: true,
-    header: false,
-    skipEmptyLines: true,
-    complete: function(results) {
-        let data = results.data;
-        let tableHead = document.getElementById("table-head");
-        let tableBody = document.getElementById("table-body");
-        
-        tableHead.innerHTML = "";
-        tableBody.innerHTML = "";
-        
-        data.forEach((row, index) => {
-            let rowHtml = "<tr>";
-            row.forEach(col => {
-                let cleanText = col ? col.trim() : "";
-                if(index === 0) {
-                    rowHtml += `<th>${cleanText}</th>`;
-                } else {
-                    rowHtml += `<td>${cleanText}</td>`;
-                }
-            });
-            rowHtml += "</tr>";
-            
-            if(index === 0) {
-                tableHead.innerHTML = rowHtml;
-            } else {
-                tableBody.innerHTML += rowHtml;
-            }
-        });
+// استدعاء البيانات وتفكيك مصفوفة الـ JSON تلقائياً
+fetch(apiURL)
+  .then(response => response.json())
+  .then(data => {
+    let tableBody = document.getElementById("table-body");
+    tableBody.innerHTML = "";
+    
+    data.forEach(item => {
+        let rowHtml = `<tr>
+            <td style="font-weight: bold; color: #3b82f6;">${item["Room Number"] || item["undefined"] || ""}</td>
+            <td>${item["Name"] || ""}</td>
+            <td style="color: #9ca3af;">${item["Job Title"] || ""}</td>
+        </tr>`;
+        tableBody.innerHTML += rowHtml;
+    });
 
-        // إظهار الجدول وإخفاء كلمة جاري التحميل
-        document.getElementById("loading-msg").style.display = "none";
-        document.getElementById("data-table").style.display = "table";
-    },
-    error: function(err) {
-        console.error("Error:", err);
-        document.getElementById("loading-msg").innerText = "فشل في قراءة جدول البيانات الحالية.";
-    }
-});
+    // إخفاء رسالة التحميل وعرض الجدول بالكامل للجميع
+    document.getElementById("loading-msg").style.display = "none";
+    document.getElementById("data-table").style.display = "table";
+  })
+  .catch(error => {
+    console.error("Error fetching Apps Script API:", error);
+    document.getElementById("loading-msg").innerText = "فشل اتصال السيرفر، يرجى إعادة تحديث الصفحة.";
+  });
 </script>
 
 </body>
