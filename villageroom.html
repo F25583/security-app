@@ -51,7 +51,7 @@
     
     <div class="header">
         <h2 style="margin: 0; color: var(--accent);">🏢 ملف التسكين وجرد الغرف - القرية الذكية</h2>
-        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">عرض تلقائي ومحدث فورياً عبر سيرفر Google Script</p>
+        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">عرض تلقائي ومحدث فورياً عبر سيرفر Google Script المطور</p>
     </div>
 
     <div class="table-container">
@@ -59,9 +59,9 @@
         <table id="data-table" style="display:none;">
             <thead>
                 <tr>
-                    <th>Room Number</th>
-                    <th>Name</th>
-                    <th>Job Title</th>
+                    <th>رقم الغرفة / الموقع</th>
+                    <th>الاسم / البيان</th>
+                    <th>القسم / الملاحظات</th>
                 </tr>
             </thead>
             <tbody id="table-body"></tbody>
@@ -70,32 +70,41 @@
 </div>
 
 <script>
-// الرابط المباشر والسحري الذي استخرجته من جوجل شيت بنجاح
-const apiURL = "https://script.google.com/macros/s/AKfycbw9elCICxsseSwcR4NvO2q8KtxWfszLVkZRJZRhAz-fmO4gcwUKlylRROESSeZrz6Fn/exec";
+// الرابط الجديد كلياً الذي يعمل ويخرج البيانات العربية بنجاح
+const apiURL = "https://script.google.com/macros/s/AKfycbxEPG5a2Sa0KayPmjSc11Odh8GcE9tHC9sLElmKW4v7lueKcJh-eJ0EWqWIzM62u64/exec";
 
-// استدعاء البيانات وتفكيك مصفوفة الـ JSON تلقائياً
 fetch(apiURL)
   .then(response => response.json())
   .then(data => {
     let tableBody = document.getElementById("table-body");
     tableBody.innerHTML = "";
     
+    if (data.length === 0) {
+        document.getElementById("loading-msg").innerText = "لا توجد بيانات متاحة في الجدول حالياً.";
+        return;
+    }
+
     data.forEach(item => {
+        // قراءة وتوزيع المفاتيح المطابقة تماماً لملف الـ JSON
+        let room = item.room || "";
+        let name = item.name || "";
+        let job = item.job || "";
+
         let rowHtml = `<tr>
-            <td style="font-weight: bold; color: #3b82f6;">${item["Room Number"] || item["undefined"] || ""}</td>
-            <td>${item["Name"] || ""}</td>
-            <td style="color: #9ca3af;">${item["Job Title"] || ""}</td>
+            <td style="font-weight: bold; color: #3b82f6;">${room}</td>
+            <td style="font-weight: 500;">${name}</td>
+            <td style="color: #10b981;">${job}</td>
         </tr>`;
         tableBody.innerHTML += rowHtml;
     });
 
-    // إخفاء رسالة التحميل وعرض الجدول بالكامل للجميع
+    // إخفاء رسالة الانتظار وعرض الجدول للمستخدمين
     document.getElementById("loading-msg").style.display = "none";
     document.getElementById("data-table").style.display = "table";
   })
   .catch(error => {
     console.error("Error fetching Apps Script API:", error);
-    document.getElementById("loading-msg").innerText = "فشل اتصال السيرفر، يرجى إعادة تحديث الصفحة.";
+    document.getElementById("loading-msg").innerText = "فشل اتصال السيرفر، يرجى التحقق من كود السكريبت.";
   });
 </script>
 
