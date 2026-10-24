@@ -41,13 +41,13 @@
         th { background-color: #2d3748; color: #fff; font-weight: bold; }
         tr:nth-child(even) { background-color: #1a202c; }
         tr:hover { background-color: rgba(59, 130, 246, 0.1); }
-        .loading { text-align: center; padding: 30px; color: #9ca3af; }
+        .loading { text-align: center; padding: 30px; color: #9ca3af; font-size: 16px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <a href="main.html" class="back-btn">⬅️ العودة للوحة التحكم</a>
+    <a href="main.html" class="back-btn">⬅️ العودة لوحة التحكم</a>
     
     <div class="header">
         <h2 style="margin: 0; color: var(--accent);">🏢 ملف التسكين وجرد الغرف - القرية الذكية</h2>
@@ -64,6 +64,7 @@
 </div>
 
 <script>
+// الرابط الصحيح والنهائي لجوجل شيت الخاص بك بصيغة CSV
 const csvURL = "https://google.com";
 
 fetch(csvURL)
@@ -73,12 +74,15 @@ fetch(csvURL)
     let tableHead = document.getElementById("table-head");
     let tableBody = document.getElementById("table-body");
     
+    tableHead.innerHTML = "";
+    tableBody.innerHTML = "";
     let isFirstRow = true;
 
     rows.forEach((row) => {
-      if (row.trim() === "") return;
+      if (!row || row.trim() === "") return;
       
-      let columns = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(",");
+      // تقسيم الصفوف بناءً على الفواصل الحقيقية لجوجل شيت مع دعم اللغة العربية
+      let columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
       let rowHtml = "<tr>";
       
       columns.forEach(col => {
@@ -99,12 +103,13 @@ fetch(csvURL)
       }
     });
 
+    // إخفاء رسالة التحميل وإظهار الجدول
     document.getElementById("loading-msg").style.display = "none";
     document.getElementById("data-table").style.display = "table";
   })
   .catch(error => {
-    console.error("خطأ أثناء معالجة البيانات:", error);
-    document.getElementById("loading-msg").innerText = "فشل تحميل جدول التسكين، يرجى التحقق من اتصال الإنترنت.";
+    console.error("Error:", error);
+    document.getElementById("loading-msg").innerText = "حدث خطأ أثناء معالجة البيانات، تأكد من اتصالك بالإنترنت.";
   });
 </script>
 
