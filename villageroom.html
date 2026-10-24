@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسكين إدارة الأمن - القرية الذكية</title>
+    <!-- استدعاء مكتبة PapaParse لحل مشاكل الامان وقراءة ملفات جوجل شيت بنجاح -->
+    <script src="https://cloudflare.com"></script>
     <style>
         :root {
             --primary: #10b981;
@@ -64,51 +66,50 @@
 </div>
 
 <script>
-const csvURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSv-287FFKaePoj1aHqLwHg0hbMXEifPnKxBsIpSzk_tQHUsmpQPCDG2eMhfV9gFAc-NfHEtEJdxiA5/pubhtml";
+// الرابط المطور والمباشر بسحب كود جدولك الفعلي حصرياً
+const csvURL = "https://google.com";
 
-fetch(csvURL)
-  .then(response => response.text())
-  .then(text => {
-    let rows = text.split("\n");
-    let tableHead = document.getElementById("table-head");
-    let tableBody = document.getElementById("table-body");
-    
-    tableHead.innerHTML = "";
-    tableBody.innerHTML = "";
-    let isFirstRow = true;
+// تشغيل القارئ الذكي للبيانات
+Papa.parse(csvURL, {
+    download: true,
+    header: false,
+    skipEmptyLines: true,
+    complete: function(results) {
+        let data = results.data;
+        let tableHead = document.getElementById("table-head");
+        let tableBody = document.getElementById("table-body");
+        
+        tableHead.innerHTML = "";
+        tableBody.innerHTML = "";
+        
+        data.forEach((row, index) => {
+            let rowHtml = "<tr>";
+            row.forEach(col => {
+                let cleanText = col ? col.trim() : "";
+                if(index === 0) {
+                    rowHtml += `<th>${cleanText}</th>`;
+                } else {
+                    rowHtml += `<td>${cleanText}</td>`;
+                }
+            });
+            rowHtml += "</tr>";
+            
+            if(index === 0) {
+                tableHead.innerHTML = rowHtml;
+            } else {
+                tableBody.innerHTML += rowHtml;
+            }
+        });
 
-    rows.forEach((row) => {
-      if (!row || row.trim() === "") return;
-      
-      // فصل الصفوف مبسط ومتوافق مع اللغة العربية
-      let columns = row.split(",");
-      let rowHtml = "<tr>";
-      
-      columns.forEach(col => {
-        let cleanText = col.replace(/^"|"$/g, '').trim();
-        if(isFirstRow) {
-          rowHtml += `<th>${cleanText}</th>`;
-        } else {
-          rowHtml += `<td>${cleanText}</td>`;
-        }
-      });
-      
-      rowHtml += "</tr>";
-      if(isFirstRow) {
-        tableHead.innerHTML = rowHtml;
-        isFirstRow = false;
-      } else {
-        tableBody.innerHTML += rowHtml;
-      }
-    });
-
-    document.getElementById("loading-msg").style.display = "none";
-    document.getElementById("data-table").style.display = "table";
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    document.getElementById("loading-msg").innerText = "فشل في عرض الملف، يرجى مراجعة إعدادات النشر.";
-  });
+        // إظهار الجدول وإخفاء كلمة جاري التحميل
+        document.getElementById("loading-msg").style.display = "none";
+        document.getElementById("data-table").style.display = "table";
+    },
+    error: function(err) {
+        console.error("Error:", err);
+        document.getElementById("loading-msg").innerText = "فشل في قراءة جدول البيانات الحالية.";
+    }
+});
 </script>
 
 </body>
