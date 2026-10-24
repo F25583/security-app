@@ -3,116 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسكين إدارة الأمن - القرية الذكية</title>
+    <title>لوحة التحكم - ملفات إدارة الأمن</title>
     <style>
         :root {
             --primary: #10b981;
             --bg-dark: #111827;
             --card-bg: #1f2937;
             --text-main: #f3f4f6;
-            --accent: #3b82f6;
+            --avaya-red: #cc0000;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        .container { width: 100%; max-width: 1000px; margin: 0 auto; }
-        .back-btn {
-            display: inline-block;
-            background-color: #374151;
-            color: var(--text-main);
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-bottom: 20px;
-            border: 1px solid #4b5563;
-            transition: background 0.2s;
-        }
-        .back-btn:hover { background-color: #4b5563; }
-        .header { background-color: var(--card-bg); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; border-right: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #app-screen { width: 100%; max-width: 600px; padding: 20px; box-sizing: border-box; }
+        .header { background-color: var(--card-bg); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; border-right: 5px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         
-        .table-container { overflow-x: auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-top: 20px; border: 1px solid #374151; }
-        table { width: 100%; border-collapse: collapse; text-align: center; }
-        th, td { padding: 14px; border: 1px solid #374151; white-space: nowrap; }
-        th { background-color: #2d3748; color: #fff; font-weight: bold; }
-        tr:nth-child(even) { background-color: #1a202c; }
-        tr:hover { background-color: rgba(59, 130, 246, 0.1); }
-        .loading { text-align: center; padding: 30px; color: #9ca3af; }
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .grid-item { 
+            background-color: var(--card-bg); 
+            padding: 30px 15px; 
+            border-radius: 12px; 
+            text-align: center; 
+            cursor: pointer; 
+            text-decoration: none;
+            color: var(--text-main);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #374151;
+        }
+        .grid-item:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+            border-color: var(--primary);
+        }
+        .grid-item.avaya-btn:hover {
+            box-shadow: 0 6px 15px rgba(204, 0, 0, 0.4);
+            border-color: var(--avaya-red);
+        }
+        .icon { font-size: 45px; margin-bottom: 12px; }
+        
+        .avaya-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 65px;
+            height: 65px;
+            margin-bottom: 12px;
+        }
+        .avaya-phone-icon { font-size: 40px; color: var(--avaya-red); }
+        .avaya-badge {
+            position: absolute;
+            bottom: -2px;
+            left: -2px;
+            background-color: var(--avaya-red);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .title { font-size: 16px; font-weight: bold; }
+        .footer { text-align: center; margin-top: 40px; color: #6b7280; font-size: 12px; }
+
+        /* Modal Settings */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background-color: var(--card-bg); padding: 25px; border-radius: 16px;
+            width: 85%; max-width: 400px; text-align: center;
+            border: 1px solid #4b5563; position: relative;
+        }
+        .close-btn { position: absolute; top: 10px; left: 15px; font-size: 24px; cursor: pointer; color: #9ca3af; }
+        .branch-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .branch-btn {
+            background-color: #374151; color: var(--text-main); padding: 14px;
+            border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;
+            border: 1px solid #4b5563; transition: background 0.2s;
+        }
+        .branch-btn:hover { background-color: var(--primary); color: #fff; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <a href="index.html" class="back-btn">⬅️ العودة للوحة التحكم</a>
-    
-    <div class="header">
-        <h2 style="margin: 0; color: var(--accent);">🏢 ملف التسكين وجرد الغرف - القرية الذكية</h2>
-        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">عرض تلقائي ومحدث فورياً من جدول البيانات</p>
-    </div>
+    <div id="app-screen">
+        <div class="header">
+            <h2 style="margin: 0; color: var(--primary);">📋 لوحة التحكم - ملفات إدارة الأمن</h2>
+            <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">موقع المتابعة الفورية للأصول والبيانات</p>
+        </div>
 
-    <div class="table-container">
-        <div id="loading-msg" class="loading">جاري جلب بيانات التسكين الحالية...</div>
-        <table id="data-table" style="display:none;">
-            <thead id="table-head"></thead>
-            <tbody id="table-body"></tbody>
-        </table>
-    </div>
-</div>
+        <div class="grid-container">
+            <a href="cameras.html" class="grid-item">
+                <div class="icon">📹</div>
+                <div class="title">أماكن وأعداد الكاميرات</div>
+            </a>
 
-<script>
-// الرابط المباشر للملف الخاص بك بصيغة CSV
-const csvURL = "https://google.com";
+            <a href="tele.html" class="grid-item avaya-btn">
+                <div class="avaya-box">
+                    <div class="avaya-phone-icon">☎️</div>
+                    <div class="avaya-badge">AVAYA</div>
+                </div>
+                <div class="title">روابط الإدارة (Avaya)</div>
+            </a>
 
-fetch(csvURL)
-  .then(response => response.text())
-  .then(text => {
-    let rows = text.split("\n");
-    let tableHead = document.getElementById("table-head");
-    let tableBody = document.getElementById("table-body");
-    
-    let isFirstRow = true;
+            <a href="extinguishers.html" class="grid-item">
+                <div class="icon">🧯</div>
+                <div class="title">طفايات وخراطيم الحريق</div>
+            </a> 
+            
+            <div class="grid-item" style="opacity: 0.5; cursor: not-allowed;">
+                <div class="icon">👥</div>
+                <div class="title">أعداد الموظفين (قريباً)</div>
+            </div>
 
-    rows.forEach((row) => {
-      if (row.trim() === "") return; // تخطي السطور الفارغة
-      
-      // دعم الفصل بالفاصلة مع مراعاة النصوص المحتواة بين علامات تنصيص
-      let columns = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(",");
-      
-      let rowHtml = "<tr>";
-      
-      columns.forEach(col => {
-        let cleanText = col.replace(/^"|"$/g, '').trim(); // تنظيف علامات التنصيص
+            <div class="grid-item" onclick="openModal()">
+                <div class="icon">🚪</div>
+                <div class="title">ملف التسكين (الفروع)</div>
+            </div>
+        </div>
         
-        if(isFirstRow) {
-          rowHtml += `<th>${cleanText}</th>`;
-        } else {
-          rowHtml += `<td>${cleanText}</td>`;
-        }
-      });
-      
-      rowHtml += "</tr>";
-      
-      if(isFirstRow) {
-        tableHead.innerHTML = rowHtml;
-        isFirstRow = false;
-      } else {
-        tableBody.innerHTML += rowHtml;
-      }
-    });
+        <div class="footer">جميع الحقوق محفوظة لإدارة الأمن © 2026</div>
+    </div>
 
-    // إخفاء رسالة التحميل وعرض الجدول بالكامل
-    document.getElementById("loading-msg").style.display = "none";
-    document.getElementById("data-table").style.display = "table";
-  })
-  .catch(error => {
-    console.error("خطأ أثناء معالجة البيانات:", error);
-    document.getElementById("loading-msg").innerText = "فشل تحميل جدول التسكين، يرجى التحقق من اتصال الإنترنت.";
-  });
-</script>
+    <div id="branchModal" class="modal" onclick="closeModalOutside(event)">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3 style="margin-top: 0; color: var(--primary);">اختر الفرع المطلوب</h3>
+            <div class="branch-buttons">
+                <a href="village.html" class="branch-btn">القرية</a>
+                <a href="maadi.html" class="branch-btn">المعادي</a>
+                <a href="nasr-city.html" class="branch-btn">مدينة نصر</a>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        function openModal() { document.getElementById('branchModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('branchModal').style.display = 'none'; }
+        function closeModalOutside(event) { if (event.target.id === 'branchModal') { closeModal(); } }
+    </script>
 </body>
 </html>
