@@ -11,6 +11,7 @@
             --card-bg: #1f2937;
             --text-main: #f3f4f6;
             --avaya-red: #cc0000;
+            --accent-blue: #3b82f6;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -47,6 +48,11 @@
             transform: translateY(-5px); 
             box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
             border-color: var(--primary);
+        }
+        /* تأثير الحوم المخصص لزر الداش بورد الأزرق */
+        .grid-item.dashboard-btn:hover {
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+            border-color: var(--accent-blue);
         }
         .grid-item.avaya-btn:hover {
             box-shadow: 0 6px 15px rgba(204, 0, 0, 0.4);
@@ -130,11 +136,12 @@
                 <div class="icon">🧯</div>
                 <div class="title">طفايات وخراطيم الحريق</div>
             </a> 
-            
-            <div class="grid-item" style="opacity: 0.5; cursor: not-allowed;">
-                <div class="icon">👥</div>
-                <div class="title">أعداد الموظفين (قريباً)</div>
-            </div>
+
+            <!-- زر لوحة الإحصائيات (Dashboard) المنفصل والجديد تماماً -->
+            <a href="dashboard.html" class="grid-item dashboard-btn">
+                <div class="icon" style="color: var(--accent-blue);">📊</div>
+                <div class="title">لوحة الإحصائيات (Dashboard)</div>
+            </a>
 
             <div class="grid-item" onclick="openModal()">
                 <div class="icon">🚪</div>
