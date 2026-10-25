@@ -169,19 +169,25 @@
 </div>
 
 <script>
-const apiURL = "https://google.com";
+// تم وضع الرابط الجديد والبديل الخاص بك هنا مع تفعيل الخادم الوسيط لحل مشكلة الـ CORS
+const originalAPI = "https://script.google.com/macros/s/AKfycbxT7EiCFg_vFdI3QxT5cmpmlc8-YJHBWa2WlJSid2jWOxM29f-b5KuoP8vQ0qSkj8Gg/exec";
+const apiURL = "https://allorigins.win" + encodeURIComponent(originalAPI);
 
 let globalData = [];
 
 fetch(apiURL)
-    .then(response => response.json())
+    .then(response => {
+        if (response.ok) return response.json();
+        throw new Error('Network response was not ok.');
+    })
     .then(data => {
-        globalData = data;
-        processData(data);
+        const parsedData = JSON.parse(data.contents);
+        globalData = parsedData;
+        processData(parsedData);
     })
     .catch(error => {
         console.error("Error fetching data:", error);
-        document.getElementById("loading-msg").innerText = "حدث خطأ أثناء جلب البيانات الحيّة، يرجى التحقق من اتصال الإنترنت.";
+        document.getElementById("loading-msg").innerText = "حدث خطأ أثناء الاتصال بالخادم، يرجى إعادة تحديث الصفحة.";
     });
 
 function processData(data) {
@@ -218,9 +224,10 @@ function processData(data) {
         else if (lowerName.includes("سنترال") || lowerName.includes("داتا") || lowerName.includes("اتصالات") || lowerName.includes("fm200") || lowerName.includes("أسطوان") || lowerName.includes("اسطوان") || lowerName.includes("أكسس")) {
             datacenterCount++;
         }
-        else if (lowerName.includes("مخزن") || lowerName.includes("المخزن") || lowerName.includes("رابش")) {
-            storageCount++;
-        }
+Use code with caution.
+else if (lowerName.includes("مخزن") || lowerName.includes("المخزن") || lowerName.includes("رابش")) {
+storageCount++;
+}
 else if (lowerName.includes("مطعم") || lowerName.includes("كافتيريا") || lowerName.includes("بوفيه") || lowerName.includes("بوفـــيه") || lowerName.includes("ماركت") || lowerName.includes("مصلى") || lowerName.includes("مسجد") || lowerName.includes("عيادة") || lowerName.includes("بريك") || lowerName.includes("تدخين") || lowerName.includes("استراحة") || lowerName.includes("نظافة") || lowerName.includes("عمال")) {
 servicesCount++;
 }
