@@ -51,10 +51,12 @@
             position: relative;
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
         }
         .dash-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+            border-color: #4b5563;
         }
         .dash-card::before {
             content: '';
@@ -64,9 +66,9 @@
         }
         .dash-card.color-blue::before { background-color: #3b82f6; }
         .dash-card.color-orange::before { background-color: #f59e0b; }
-        .dash-card.color-purple::before { background-color: #a855f7; }
-        .dash-card.color-yellow::before { background-color: #eab308; }
         .dash-card.color-red::before { background-color: #ef4444; }
+        .dash-card.color-yellow::before { background-color: #eab308; }
+        .dash-card.color-purple::before { background-color: #a855f7; }
         .dash-card.color-cyan::before { background-color: #06b6d4; }
 
         .dash-card .count {
@@ -81,37 +83,141 @@
             font-weight: 500;
         }
         .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 18px; }
+
+        .details-section {
+            background-color: var(--card-bg);
+            border: 1px solid #374151;
+            border-radius: 14px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .details-title {
+            margin-top: 0;
+            color: #ffffff;
+            border-bottom: 2px solid #374151;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .search-container {
+            margin: 15px 0 5px 0;
+            width: 100%;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #111827;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus {
+            border-color: var(--accent);
+        }
+        .rooms-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            text-align: right;
+        }
+        .rooms-table th, .rooms-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #374151;
+        }
+        .rooms-table th {
+            background-color: #111827;
+            color: var(--accent);
+        }
+        .rooms-table tr:hover {
+            background-color: #253142;
+        }
+        .rooms-table tr.hidden {
+            display: none;
+        }
+        .room-tag {
+            background-color: #374151;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
-
 <div class="container">
     <a href="main.html" class="back-btn">⬅️ العودة لوحة التحكم</a>
     
     <div class="header">
         <h2 style="margin: 0; color: var(--accent);">📊 لوحة القيادة والتحليل الأمني واللوجستي (Dashboard)</h2>
-        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">تصنيف ورصد الأصول الشامل بناءً على التحليل التلقائي الدقيق للموقع</p>
+        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">اضغط على أي تصنيف أدناه لعرض تفاصيل وجدول الغرف التابعة له فوراً والبحث بداخلها</p>
     </div>
 
     <div id="loading-msg" class="loading">جاري تجميع الأصول وفرزها أمنياً...</div>
 
-    <!-- شبكة التصنيفات المعتمدة على التحليل الفني للموقع -->
     <div class="dashboard-grid" id="dashboard-content" style="display: none;">
-        <div class="dash-card color-blue"><div class="count" id="count-training">0</div><div class="label">🏫 غرف التدريب والقاعات المجهزة</div></div>
-        <div class="dash-card color-orange"><div class="count" id="count-work">0</div><div class="label">🖥️ صالات ومساحات العمل والتشغيل</div></div>
-        <div class="dash-card color-red"><div class="count" id="count-security">0</div><div class="label">🚪 منافذ الطوارئ، الجراجات والبوابات</div></div>
-        <div class="dash-card color-yellow"><div class="count" id="count-power">0</div><div class="label">⚡ غرف وسيرفرات الطاقة والتكييف والميكانيكا</div></div>
-        <div class="dash-card color-purple"><div class="count" id="count-datacenter">0</div><div class="label">🌐 غرف السنترال، الداتا سنتر والاتصالات</div></div>
-        <div class="dash-card"><div class="count" id="count-storage">0</div><div class="label">📦 المخازن اللوجستية (الصيانة، الشئون والشركة)</div></div>
-        <div class="dash-card color-cyan"><div class="count" id="count-services">0</div><div class="label">🍎 الخدمات والمرافق (المطاعم، المصليات والعيادة)</div></div>
+        <div class="dash-card color-blue" onclick="showRoomsDetails('training')"><div class="count" id="count-training">0</div><div class="label">🏫 غرف التدريب والقاعات المجهزة</div></div>
+        <div class="dash-card color-orange" onclick="showRoomsDetails('work')"><div class="count" id="count-work">0</div><div class="label">🖥️ صالات ومساحات العمل والتشغيل</div></div>
+        <div class="dash-card color-red" onclick="showRoomsDetails('security')"><div class="count" id="count-security">0</div><div class="label">🚪 منافذ الطوارئ، الجراجات والبوابات</div></div>
+        <div class="dash-card color-yellow" onclick="showRoomsDetails('power')"><div class="count" id="count-power">0</div><div class="label">⚡ غرف وسيرفرات الطاقة والتكييف والميكانيكا</div></div>
+        <div class="dash-card color-purple" onclick="showRoomsDetails('datacenter')"><div class="count" id="count-datacenter">0</div><div class="label">🌐 غرف السنترال، الداتا سنتر والاتصالات</div></div>
+        <div class="dash-card" onclick="showRoomsDetails('storage')"><div class="count" id="count-storage">0</div><div class="label">📦 المخازن اللوجستية (الصيانة، الشئون والشركة)</div></div>
+        <div class="dash-card color-cyan" onclick="showRoomsDetails('services')"><div class="count" id="count-services">0</div><div class="label">🍎 الخدمات والمرافق (المطاعم، المصليات والعيادة)</div></div>
+    </div>
+
+    <div id="details-section" class="details-section" style="display: none;">
+        <div class="details-title">
+            <div>
+                <span id="selected-category-title">اسم التصنيف</span>
+                <span style="font-size: 14px; color: #9ca3af; margin-right: 5px;" id="selected-category-count">(0 غرفة)</span>
+            </div>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="table-search" class="search-input" placeholder="🔍 ابحث هنا برقم الغرفة أو اسم البيان المفتوح حالياً..." oninput="filterTable()">
+        </div>
+
+        <table class="rooms-table" id="rooms-table-el">
+            <thead>
+                <tr>
+                    <th>رقم الغرفة</th>
+                    <th>البيان / الاسم</th>
+                    <th>المسمى الوظيفي / القسم</th>
+                </tr>
+            </thead>
+            <tbody id="rooms-list-body">
+                <!-- سيتم ملء الغرف هنا تلقائياً -->
+            </tbody>
+        </table>
     </div>
 </div>
-
 <script>
-// الرابط المباشر والسليم الذي أرسلته للتو
-const apiURL = "https://script.google.com/macros/s/AKfycbziD3-PvQscLgRl_5YrBHTA4RoQy5v7q4dOOr2kpdNI5D8DPvNayLL9VKU7lN3UXOBN/exec";
+const originalAPI = "https://google.com";
+const apiURL = "https://allorigins.win" + encodeURIComponent(originalAPI);
 
-// دالة لمعالجة وتوزيع البيانات بعد فك حظر الـ CORS تلقائياً
+let globalData = [];
+
+fetch(apiURL)
+    .then(response => {
+        if (response.ok) return response.json();
+        throw new Error('Network response was not ok.');
+    })
+    .then(data => {
+        const parsedData = JSON.parse(data.contents);
+        globalData = parsedData;
+        processData(parsedData);
+    })
+    .catch(error => {
+        console.error("Error fetching data:", error);
+        document.getElementById("loading-msg").innerText = "حدث خطأ أثناء الاتصال بالخادم، يرجى إعادة تحديث الصفحة.";
+    });
+
 function processData(data) {
     if (!data || data.length === 0) {
         document.getElementById("loading-msg").innerText = "لا توجد بيانات متوفرة حالياً.";
@@ -129,40 +235,31 @@ function processData(data) {
     data.forEach(item => {
         let name = item["Name"] || item["الاسم"] || "";
         let lowerName = name.toLowerCase().trim();
-        
         if (!lowerName) return;
 
-        // 1. غرف وقاعات التدريب والاجتماعات
         if (lowerName.includes("تدريب") || lowerName.includes("إجتماع") || lowerName.includes("اجتماع")) {
             trainingCount++;
         }
-        // 2. صالات ومساحات العمل المباشر والمكاتب الإدارية والـ CEO
         else if (lowerName.includes("صالة عمل") || lowerName.includes("صاله عمل") || lowerName.includes("مكتب") || lowerName.includes("ceo") || lowerName.includes("أكسيد") || lowerName.includes("فيديوترون") || lowerName.includes("فيديو ترون") || lowerName.includes("هلب ديسك")) {
             workCount++;
         }
-        // 3. بوابات ومنافذ الطوارئ، الجراجات، الحراسة وأفراد الأمن
         else if (lowerName.includes("باب") || lowerName.includes("مخرج") || lowerName.includes("مدخل") || lowerName.includes("جراج") || lowerName.includes("طوارئ") || lowerName.includes("طوارىء") || lowerName.includes("أمن") || lowerName.includes("الامن") || lowerName.includes("جارد") || lowerName.includes("خلفى")) {
             securityCount++;
         }
-        // 4. البنية التحتية للطاقة: كهرباء، مولدات، تكييف، طلمبات وضغط عالي و AHU
         else if (lowerName.includes("كهرباء") || lowerName.includes("تكييف") || lowerName.includes("طلمبات") || lowerName.includes("ahu") || lowerName.includes("المولد") || lowerName.includes("الضغط العالى") || lowerName.includes("وقود") || lowerName.includes("ميكانيكا") || lowerName.includes("لوحة")) {
             powerCount++;
         }
-        // 5. الاتصالات الحرجة: سنترال، داتا سنتر، اتصالات ومخزن اتصالات وغرف الداتا والـ FM200
         else if (lowerName.includes("سنترال") || lowerName.includes("داتا") || lowerName.includes("اتصالات") || lowerName.includes("fm200") || lowerName.includes("أسطوان") || lowerName.includes("اسطوان") || lowerName.includes("أكسس")) {
             datacenterCount++;
         }
-        // 6. المخازن اللوجستية والرابش
         else if (lowerName.includes("مخزن") || lowerName.includes("المخزن") || lowerName.includes("رابش")) {
             storageCount++;
         }
-        // 7. الخدمات والمرافق والراحة العامة للموظفين
         else if (lowerName.includes("مطعم") || lowerName.includes("كافتيريا") || lowerName.includes("بوفيه") || lowerName.includes("بوفـــيه") || lowerName.includes("ماركت") || lowerName.includes("مصلى") || lowerName.includes("مسجد") || lowerName.includes("عيادة") || lowerName.includes("بريك") || lowerName.includes("تدخين") || lowerName.includes("استراحة") || lowerName.includes("نظافة") || lowerName.includes("عمال")) {
             servicesCount++;
         }
     });
 
-    // حقن الأرقام والمخرجات بشكل سليم داخل الكروت المخصصة
     document.getElementById("count-training").innerText = trainingCount;
     document.getElementById("count-work").innerText = workCount;
     document.getElementById("count-security").innerText = securityCount;
@@ -171,23 +268,85 @@ function processData(data) {
     document.getElementById("count-storage").innerText = storageCount;
     document.getElementById("count-services").innerText = servicesCount;
 
-    // إخفاء رسالة التحميل وعرض لوحة الإحصائيات
     document.getElementById("loading-msg").style.display = "none";
     document.getElementById("dashboard-content").style.display = "grid";
 }
 
-// تنفيذ جلب برمي آمن يتخطى قيود الـ CORS للمتصفحات
-fetch(apiURL)
-  .then(response => response.json())
-  .then(data => processData(data))
-  .catch(error => {
-      console.log("CORS block detected, switching to JSONP backup protocol...");
-      // حماية بديلية من جيت هاب لكسر الحماية
-      const script = document.createElement('script');
-      script.src = apiURL + (apiURL.includes('?') ? '&' : '?') + 'callback=processData';
-      document.body.appendChild(script);
-  });
-</script>
+function showRoomsDetails(category) {
+    const tbody = document.getElementById("rooms-list-body");
+    tbody.innerHTML = ""; 
+    document.getElementById("table-search").value = "";
+    
+    let filteredRooms = [];
+    let titleText = "";
 
+    globalData.forEach(item => {
+        let name = item["Name"] || "";
+        let lowerName = name.toLowerCase().trim();
+        let roomNum = item["Room Number"] || "بدون رقم";
+        let jobTitle = item["Job Title"] || "-";
+
+        if (category === 'training' && (lowerName.includes("تدريب") || lowerName.includes("إجتماع") || lowerName.includes("اجتماع"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🏫 غرف التدريب والقاعات المجهزة";
+        }
+        else if (category === 'work' && (lowerName.includes("صالة عمل") || lowerName.includes("صاله عمل") || lowerName.includes("مكتب") || lowerName.includes("ceo") || lowerName.includes("أكسيد") || lowerName.includes("فيديوترون") || lowerName.includes("فيديو ترون") || lowerName.includes("هلب ديسك"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🖥️ صالات ومساحات العمل والتشغيل";
+        }
+        else if (category === 'security' && (lowerName.includes("باب") || lowerName.includes("مخرج") || lowerName.includes("مدخل") || lowerName.includes("جراج") || lowerName.includes("طوارئ") || lowerName.includes("طوارىء") || lowerName.includes("أمن") || lowerName.includes("الامن") || lowerName.includes("جارد") || lowerName.includes("خلفى"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🚪 منافذ الطوارئ، الجراجات والبوابات";
+        }
+        else if (category === 'power' && (lowerName.includes("كهرباء") || lowerName.includes("تكييف") || lowerName.includes("طلمبات") || lowerName.includes("ahu") || lowerName.includes("المولد") || lowerName.includes("الضغط العالى") || lowerName.includes("وقود") || lowerName.includes("ميكانيكا") || lowerName.includes("لوحة"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "⚡ غرف وسيرفرات الطاقة والتكييف والميكانيكا";
+        }
+        else if (category === 'datacenter' && (lowerName.includes("سنترال") || lowerName.includes("داتا") || lowerName.includes("اتصالات") || lowerName.includes("fm200") || lowerName.includes("أسطوان") || lowerName.includes("اسطوان") || lowerName.includes("أكسس"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🌐 غرف السنترال، الداتا سنتر والاتصالات";
+        }
+        else if (category === 'storage' && (lowerName.includes("مخزن") || lowerName.includes("المخزن") || lowerName.includes("رابش"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "📦 المخازن اللوجستية";
+        }
+        else if (category === 'services' && (lowerName.includes("مطعم") || lowerName.includes("كافتيريا") || lowerName.includes("بوفيه") || lowerName.includes("بوفـــيه") || lowerName.includes("ماركت") || lowerName.includes("مصلى") || lowerName.includes("مسجد") || lowerName.includes("عيادة") || lowerName.includes("بريك") || lowerName.includes("تدخين") || lowerName.includes("استراحة") || lowerName.includes("نظافة") || lowerName.includes("عمال"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🍎 الخدمات والمرافق العامة";
+        }
+    });
+
+    document.getElementById("selected-category-title").innerText = titleText;
+    document.getElementById("selected-category-count").innerText = `(${filteredRooms.length} غرفة/مرفق)`;
+
+    filteredRooms.forEach(room => {
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><span class="room-tag">${room.roomNum}</span></td>
+            <td>${room.name}</td>
+            <td><span style="color: #9ca3af;">${room.jobTitle}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    const detailsSection = document.getElementById("details-section");
+    detailsSection.style.display = "block";
+    detailsSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+function filterTable() {
+    const searchValue = document.getElementById("table-search").value.toLowerCase().trim();
+    const rows = document.querySelectorAll("#rooms-list-body tr");
+
+    rows.forEach(row => {
+        const textStr = row.textContent.toLowerCase();
+        if (textStr.includes(searchValue)) {
+            row.classList.remove("hidden");
+        } else {
+            row.classList.add("hidden");
+        }
+    });
+}
+</script>
 </body>
 </html>
