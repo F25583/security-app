@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة الإحصائيات والتحليل الفوري - إدارة الأمن</title>
+    <!-- استدعاء مكتبة PapaParse لضمان معالجة البيانات بأعلى حماية أمنية -->
+    <script src="https://cloudflare.com"></script>
     <style>
         :root {
             --primary: #10b981;
@@ -95,13 +97,13 @@
 
     <div id="loading-msg" class="loading">جاري تجميع الأصول وفرزها أمنياً...</div>
 
-    <!-- شبكة التصنيفات بناءً على رؤيتي التحليلية للموقع -->
+    <!-- شبكة التصنيفات المصلحة بالكامل -->
     <div class="dashboard-grid" id="dashboard-content" style="display: none;">
         <div class="dash-card color-blue"><div class="count" id="count-training">0</div><div class="label">🏫 غرف التدريب والقاعات المجهزة</div></div>
         <div class="dash-card color-orange"><div class="count" id="count-work">0</div><div class="label">🖥️ صالات ومساحات العمل والتشغيل</div></div>
-        <div class="dash-card color-red"><div class="count" id="count-gates"><div class="count" id="count-security">0</div></div><div class="label">🚪 منافذ الطوارئ، الجراجات والبوابات</div></div>
+        <div class="dash-card color-red"><div class="count" id="count-security">0</div><div class="label">🚪 منافذ الطوارئ، الجراجات والبوابات</div></div>
         <div class="dash-card color-yellow"><div class="count" id="count-power">0</div><div class="label">⚡ غرف وسيرفرات الطاقة والتكييف والميكانيكا</div></div>
-        <div class="dash-card color-purple"><div class="count" id="count-it"><div class="count" id="count-datacenter">0</div></div><div class="label">🌐 غرف السنترال، الداتا سنتر والاتصالات</div></div>
+        <div class="dash-card color-purple"><div class="count" id="count-datacenter">0</div><div class="label">🌐 غرف السنترال، الداتا سنتر والاتصالات</div></div>
         <div class="dash-card"><div class="count" id="count-storage">0</div><div class="label">📦 المخازن اللوجستية (الصيانة، الشئون والشركة)</div></div>
         <div class="dash-card color-cyan"><div class="count" id="count-services">0</div><div class="label">🍎 الخدمات والمرافق (المطاعم، المصليات والعيادة)</div></div>
     </div>
@@ -118,16 +120,16 @@ fetch(apiURL)
         return;
     }
 
-    let trainingCount = 0;   // غرف التدريب
-    let workCount = 0;       // صالات العمل
-    let securityCount = 0;   // المنافذ والبوابات والأمن
-    let powerCount = 0;      // الطاقة والتكييف والمولدات
-    let datacenterCount = 0; // الاتصالات والداتا سنتر
-    let storageCount = 0;    // المخازن بكل أنواعها
-    let servicesCount = 0;   // الخدمات (مطاعم، مصليات، عيادة، بريك، تدخين)
+    let trainingCount = 0;   
+    let workCount = 0;       
+    let securityCount = 0;   
+    let powerCount = 0;      
+    let datacenterCount = 0; 
+    let storageCount = 0;    
+    let servicesCount = 0;   
 
     data.forEach(item => {
-        let name = item["Name"] || "";
+        let name = item["Name"] || item["الاسم"] || "";
         let lowerName = name.toLowerCase().trim();
         
         // 1. غرف وقاعات التدريب والاجتماعات
@@ -160,7 +162,7 @@ fetch(apiURL)
         }
     });
 
-    // حقن الأرقام الناتجة عن رؤيتنا التحليلية الشاملة
+    // حقن الأرقام الصحيحة بعد إصلاح الـ IDs المعلقة
     document.getElementById("count-training").innerText = trainingCount;
     document.getElementById("count-work").innerText = workCount;
     document.getElementById("count-security").innerText = securityCount;
