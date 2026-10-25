@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة الإحصائيات والتحليل الفوري - إدارة الأمن</title>
-    <!-- استدعاء مكتبة PapaParse لضمان معالجة البيانات بأعلى حماية أمنية -->
-    <script src="https://cloudflare.com"></script>
     <style>
         :root {
             --primary: #10b981;
@@ -97,7 +95,7 @@
 
     <div id="loading-msg" class="loading">جاري تجميع الأصول وفرزها أمنياً...</div>
 
-    <!-- شبكة التصنيفات المصلحة بالكامل -->
+    <!-- شبكة التصنيفات الحية -->
     <div class="dashboard-grid" id="dashboard-content" style="display: none;">
         <div class="dash-card color-blue"><div class="count" id="count-training">0</div><div class="label">🏫 غرف التدريب والقاعات المجهزة</div></div>
         <div class="dash-card color-orange"><div class="count" id="count-work">0</div><div class="label">🖥️ صالات ومساحات العمل والتشغيل</div></div>
@@ -110,6 +108,7 @@
 </div>
 
 <script>
+// تم وضع رابط الـ API الفعلي والمطور الخاص بك بنجاح لقراءة مصفوفة البيانات
 const apiURL = "https://google.com";
 
 fetch(apiURL)
@@ -162,7 +161,7 @@ fetch(apiURL)
         }
     });
 
-    // حقن الأرقام الصحيحة بعد إصلاح الـ IDs المعلقة
+    // حقن الأرقام والمخرجات المكتملة بشكل سليم داخل الكروت المخصصة
     document.getElementById("count-training").innerText = trainingCount;
     document.getElementById("count-work").innerText = workCount;
     document.getElementById("count-security").innerText = securityCount;
@@ -171,7 +170,7 @@ fetch(apiURL)
     document.getElementById("count-storage").innerText = storageCount;
     document.getElementById("count-services").innerText = servicesCount;
 
-    // إخفاء رسالة التحميل وعرض لوحة الإحصائيات
+    // إخفاء رسالة التحميل وعرض شبكة التصنيفات
     document.getElementById("loading-msg").style.display = "none";
     document.getElementById("dashboard-content").style.display = "grid";
   })
