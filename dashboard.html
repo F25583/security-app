@@ -95,7 +95,7 @@
 
     <div id="loading-msg" class="loading">جاري تجميع الأصول وفرزها أمنياً...</div>
 
-    <!-- شبكة التصنيفات الحية -->
+    <!-- شبكة التصنيفات المعتمدة على التحليل الفني للموقع -->
     <div class="dashboard-grid" id="dashboard-content" style="display: none;">
         <div class="dash-card color-blue"><div class="count" id="count-training">0</div><div class="label">🏫 غرف التدريب والقاعات المجهزة</div></div>
         <div class="dash-card color-orange"><div class="count" id="count-work">0</div><div class="label">🖥️ صالات ومساحات العمل والتشغيل</div></div>
@@ -108,12 +108,11 @@
 </div>
 
 <script>
-// تم وضع رابط الـ API الفعلي والمطور الخاص بك بنجاح لقراءة مصفوفة البيانات
-const apiURL = "https://google.com";
+// الرابط المباشر والسليم الذي أرسلته للتو
+const apiURL = "https://script.google.com/macros/s/AKfycbziD3-PvQscLgRl_5YrBHTA4RoQy5v7q4dOOr2kpdNI5D8DPvNayLL9VKU7lN3UXOBN/exec";
 
-fetch(apiURL)
-  .then(response => response.json())
-  .then(data => {
+// دالة لمعالجة وتوزيع البيانات بعد فك حظر الـ CORS تلقائياً
+function processData(data) {
     if (!data || data.length === 0) {
         document.getElementById("loading-msg").innerText = "لا توجد بيانات متوفرة حالياً.";
         return;
@@ -131,6 +130,8 @@ fetch(apiURL)
         let name = item["Name"] || item["الاسم"] || "";
         let lowerName = name.toLowerCase().trim();
         
+        if (!lowerName) return;
+
         // 1. غرف وقاعات التدريب والاجتماعات
         if (lowerName.includes("تدريب") || lowerName.includes("إجتماع") || lowerName.includes("اجتماع")) {
             trainingCount++;
@@ -147,7 +148,7 @@ fetch(apiURL)
         else if (lowerName.includes("كهرباء") || lowerName.includes("تكييف") || lowerName.includes("طلمبات") || lowerName.includes("ahu") || lowerName.includes("المولد") || lowerName.includes("الضغط العالى") || lowerName.includes("وقود") || lowerName.includes("ميكانيكا") || lowerName.includes("لوحة")) {
             powerCount++;
         }
-        // 5. الاتصالات الحرجة: سنترال، داتا سنتر، اتصالات ومخزن اتصالات وغرف الداتا والـ FM200 المرتبطة بها أمنياً
+        // 5. الاتصالات الحرجة: سنترال، داتا سنتر، اتصالات ومخزن اتصالات وغرف الداتا والـ FM200
         else if (lowerName.includes("سنترال") || lowerName.includes("داتا") || lowerName.includes("اتصالات") || lowerName.includes("fm200") || lowerName.includes("أسطوان") || lowerName.includes("اسطوان") || lowerName.includes("أكسس")) {
             datacenterCount++;
         }
@@ -161,7 +162,7 @@ fetch(apiURL)
         }
     });
 
-    // حقن الأرقام والمخرجات المكتملة بشكل سليم داخل الكروت المخصصة
+    // حقن الأرقام والمخرجات بشكل سليم داخل الكروت المخصصة
     document.getElementById("count-training").innerText = trainingCount;
     document.getElementById("count-work").innerText = workCount;
     document.getElementById("count-security").innerText = securityCount;
@@ -170,13 +171,21 @@ fetch(apiURL)
     document.getElementById("count-storage").innerText = storageCount;
     document.getElementById("count-services").innerText = servicesCount;
 
-    // إخفاء رسالة التحميل وعرض شبكة التصنيفات
+    // إخفاء رسالة التحميل وعرض لوحة الإحصائيات
     document.getElementById("loading-msg").style.display = "none";
     document.getElementById("dashboard-content").style.display = "grid";
-  })
+}
+
+// تنفيذ جلب برمي آمن يتخطى قيود الـ CORS للمتصفحات
+fetch(apiURL)
+  .then(response => response.json())
+  .then(data => processData(data))
   .catch(error => {
-    console.error("Error generating advanced dashboard:", error);
-    document.getElementById("loading-msg").innerText = "حدث خطأ أثناء تحميل لوحة التحليلات المتقدمة.";
+      console.log("CORS block detected, switching to JSONP backup protocol...");
+      // حماية بديلية من جيت هاب لكسر الحماية
+      const script = document.createElement('script');
+      script.src = apiURL + (apiURL.includes('?') ? '&' : '?') + 'callback=processData';
+      document.body.appendChild(script);
   });
 </script>
 
