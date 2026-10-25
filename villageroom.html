@@ -35,32 +35,6 @@
         .back-btn:hover { background-color: #4b5563; }
         .header { background-color: var(--card-bg); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; border-right: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         
-        /* تصميم الـ Dashboard */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        .dash-card {
-            background-color: var(--card-bg);
-            border: 1px solid #374151;
-            padding: 20px 10px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .dash-card .count {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
-        .dash-card .label {
-            font-size: 14px;
-            color: #9ca3af;
-        }
-
         .table-container { overflow-x: auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-top: 20px; border: 1px solid #374151; }
         table { width: 100%; border-collapse: collapse; text-align: center; }
         th, td { padding: 14px; border: 1px solid #374151; white-space: nowrap; }
@@ -76,95 +50,73 @@
     <a href="main.html" class="back-btn">⬅️ العودة لوحة التحكم</a>
     
     <div class="header">
-        <h2 style="margin: 0; color: var(--accent);">📊 داش بورد وإحصائيات التسكين - القرية الذكية</h2>
-        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">تحليل أعداد المقرات وجردها فورياً من جدول البيانات</p>
-    </div>
-
-    <!-- لوحة الإحصائيات (الداش بورد) -->
-    <div class="dashboard-grid">
-        <div class="dash-card"><div class="count" id="count-office">0</div><div class="label">💼 المكاتب</div></div>
-        <div class="dash-card"><div class="count" id="count-training">0</div><div class="label">🏫 غرف التدريب</div></div>
-        <div class="dash-card"><div class="count" id="count-work">0</div><div class="label">🖥️ صالات العمل</div></div>
-        <div class="dash-card"><div class="count" id="count-buffet">0</div><div class="label">☕ البوفيهات والمطاعم</div></div>
-        <div class="dash-card"><div class="count" id="count-power">0</div><div class="label">⚡ غرف الكهرباء</div></div>
-        <div class="dash-card"><div class="count" id="count-fm200">0</div><div class="label">🧯 منظومة FM200</div></div>
+        <h2 style="margin: 0; color: var(--accent);">🏢 ملف التسكين وجرد الغرف - القرية الذكية</h2>
+        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">عرض كامل لجميع الأعمدة الخمسة محدثة فورياً عبر سيرفر Google Script</p>
     </div>
 
     <div class="table-container">
-        <div id="loading-msg" class="loading">جاري سحب جداول البيانات وتحديث الإحصائيات الحالية...</div>
+        <div id="loading-msg" class="loading">جاري سحب جداول البيانات المحدثة وفك الحماية الحالية...</div>
         <table id="data-table" style="display:none;">
-            <thead>
-                <tr>
-                    <th>Room Number</th>
-                    <th>Name</th>
-                    <th>Job Title</th>
-                </tr>
-            </thead>
+            <thead id="table-head"></thead>
             <tbody id="table-body"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-const apiURL = "https://google.com";
+// الرابط الجديد كلياً الذي يحتوي على الأعمدة الخمسة كاملة
+const apiURL = "https://script.google.com/macros/s/AKfycbymqN_go556fouGUgAxIHox1eocVag4fBnJx9DhJNYFLNPm3_f4g8z_-WA-oCmIgY2a/exec";
 
 fetch(apiURL)
   .then(response => response.json())
   .then(data => {
     if (!data || data.length === 0) {
-        document.getElementById("loading-msg").innerText = "لا توجد بيانات متاحة حالياً.";
+        document.getElementById("loading-msg").innerText = "لا توجد بيانات متاحة في الجدول حالياً.";
         return;
     }
 
+    let tableHead = document.getElementById("table-head");
     let tableBody = document.getElementById("table-body");
+    
+    tableHead.innerHTML = "";
     tableBody.innerHTML = "";
 
-    // متغيرات العدادات
-    let officeCount = 0;
-    let trainingCount = 0;
-    let workCount = 0;
-    let buffetCount = 0;
-    let powerCount = 0;
-    let fm200Count = 0;
+    // استخراج أسماء الأعمدة ديناميكياً من أول عنصر في البيانات المخرجة
+    let headers = Object.keys(data[0]);
+    
+    // 1. بناء صف العناوين الرئيسي (Thead) تلقائياً
+    let headHtml = "<tr>";
+    headers.forEach(header => {
+        headHtml += `<th>${header}</th>`;
+    });
+    headHtml += "</tr>";
+    tableHead.innerHTML = headHtml;
 
+    // 2. بناء صفوف البيانات بالكامل (Tbody) لجميع الـ 5 أعمدة
     data.forEach(item => {
-        // قراءة البيانات بالاعتماد على أسماء الأعمدة المكتوبة بالشيت الحالي
-        let room = item["Room Number"] || item["الموقع/ الغرفة"] || "";
-        let name = item["Name"] || item["الاسم"] || "";
-        let job = item["Job Title"] || item["الوظيفة"] || "";
-
-        // منطق التصفية والعد الذكي بناءً على الكلمات المفتاحية
-        let lowerName = name.toLowerCase();
-        
-        if (lowerName.includes("مكتب")) officeCount++;
-        if (lowerName.includes("تدريب")) trainingCount++;
-        if (lowerName.includes("صالة عمل") || lowerName.includes("صاله عمل")) workCount++;
-        if (lowerName.includes("بوفيه") || lowerName.includes("مطعم") || lowerName.includes("كافتيريا")) buffetCount++;
-        if (lowerName.includes("كهرباء") || lowerName.includes("تكييف") || lowerName.includes("طلمبات") || lowerName.includes("ahu")) powerCount++;
-        if (lowerName.includes("fm200") || lowerName.includes("أسطوان") || lowerName.includes("اسطوان")) fm200Count++;
-
-        let rowHtml = `<tr>
-            <td style="font-weight: bold; color: #3b82f6;">${room}</td>
-            <td style="font-weight: 500;">${name}</td>
-            <td style="color: #10b981;">${job}</td>
-        </tr>`;
+        let rowHtml = "<tr>";
+        headers.forEach((header, index) => {
+            let val = item[header] || "";
+            // تنسيقات جمالية مميزة للأعمدة
+            if (index === 0) {
+                rowHtml += `<td style="font-weight: bold; color: #3b82f6;">${val}</td>`; // العمود الأول بلون أزرق مميز للموقع
+            } else if (index === 2) {
+                rowHtml += `<td style="color: #10b981; font-weight: 500;">${val}</td>`; // عمود الوظيفة بلون أخضر
+            } else {
+                rowHtml += `<td>${val}</td>`;
+            }
+        });
+        rowHtml += "</tr>";
         tableBody.innerHTML += rowHtml;
     });
 
-    // تحديث الأرقام داخل الداش بورد
-    document.getElementById("count-office").innerText = officeCount;
-    document.getElementById("count-training").innerText = trainingCount;
-    document.getElementById("count-work").innerText = workCount;
-    document.getElementById("count-buffet").innerText = buffetCount;
-    document.getElementById("count-power").innerText = powerCount;
-    document.getElementById("count-fm200").innerText = fm200Count;
-
+    // إخفاء رسالة التحميل وعرض الجدول المتكامل للجميع
     document.getElementById("loading-msg").style.display = "none";
     document.getElementById("data-table").style.display = "table";
   })
   .catch(error => {
-    console.error("Error backing dashboard data:", error);
-    document.getElementById("loading-msg").innerText = "حدث خطأ أثناء تحميل إحصائيات الداش بورد.";
+    console.error("Error fetching dynamic 5-column data:", error);
+    document.getElementById("loading-msg").innerText = "حدث خطأ أثناء قراءة الأعمدة الديناميكية، يرجى التحديث.";
   });
 </script>
 
