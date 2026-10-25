@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإحصائيات والتحليل الفوري - إدارة الأمن</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --bg-dark: #111827;
+            --card-bg: #1f2937;
+            --text-main: #f3f4f6;
+            --accent: #3b82f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+        .container { width: 100%; max-width: 1100px; margin: 0 auto; }
+        .back-btn {
+            display: inline-block;
+            background-color: #374151;
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px solid #4b5563;
+            transition: background 0.2s;
+        }
+        .back-btn:hover { background-color: #4b5563; }
+        .header { background-color: var(--card-bg); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 30px; border-right: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+        .dash-card {
+            background-color: var(--card-bg);
+            border: 1px solid #374151;
+            padding: 25px 15px;
+            border-radius: 14px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.2);
+        }
+        .dash-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; width: 4px; height: 100%;
+            background-color: var(--primary);
+        }
+        .dash-card.color-blue::before { background-color: #3b82f6; }
+        .dash-card.color-orange::before { background-color: #f59e0b; }
+        .dash-card.color-purple::before { background-color: #a855f7; }
+        .dash-card.color-yellow::before { background-color: #eab308; }
+        .dash-card.color-red::before { background-color: #ef4444; }
+        .dash-card.color-cyan::before { background-color: #06b6d4; }
+
+        .dash-card .count {
+            font-size: 38px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+        .dash-card .label {
+            font-size: 15px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="main.html" class="back-btn">⬅️ العودة لوحة التحكم</a>
+    
+    <div class="header">
+        <h2 style="margin: 0; color: var(--accent);">📊 لوحة القيادة والتحليل الأمني واللوجستي (Dashboard)</h2>
+        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">تصنيف ورصد الأصول الشامل بناءً على التحليل التلقائي الدقيق للموقع</p>
+    </div>
+
+    <div id="loading-msg" class="loading">جاري تجميع الأصول وفرزها أمنياً...</div>
+
+    <!-- شبكة التصنيفات بناءً على رؤيتي التحليلية للموقع -->
+    <div class="dashboard-grid" id="dashboard-content" style="display: none;">
+        <div class="dash-card color-blue"><div class="count" id="count-training">0</div><div class="label">🏫 غرف التدريب والقاعات المجهزة</div></div>
+        <div class="dash-card color-orange"><div class="count" id="count-work">0</div><div class="label">🖥️ صالات ومساحات العمل والتشغيل</div></div>
+        <div class="dash-card color-red"><div class="count" id="count-gates"><div class="count" id="count-security">0</div></div><div class="label">🚪 منافذ الطوارئ، الجراجات والبوابات</div></div>
+        <div class="dash-card color-yellow"><div class="count" id="count-power">0</div><div class="label">⚡ غرف وسيرفرات الطاقة والتكييف والميكانيكا</div></div>
+        <div class="dash-card color-purple"><div class="count" id="count-it"><div class="count" id="count-datacenter">0</div></div><div class="label">🌐 غرف السنترال، الداتا سنتر والاتصالات</div></div>
+        <div class="dash-card"><div class="count" id="count-storage">0</div><div class="label">📦 المخازن اللوجستية (الصيانة، الشئون والشركة)</div></div>
+        <div class="dash-card color-cyan"><div class="count" id="count-services">0</div><div class="label">🍎 الخدمات والمرافق (المطاعم، المصليات والعيادة)</div></div>
+    </div>
+</div>
+
+<script>
+const apiURL = "https://google.com";
+
+fetch(apiURL)
+  .then(response => response.json())
+  .then(data => {
+    if (!data || data.length === 0) {
+        document.getElementById("loading-msg").innerText = "لا توجد بيانات متوفرة حالياً.";
+        return;
+    }
+
+    let trainingCount = 0;   // غرف التدريب
+    let workCount = 0;       // صالات العمل
+    let securityCount = 0;   // المنافذ والبوابات والأمن
+    let powerCount = 0;      // الطاقة والتكييف والمولدات
+    let datacenterCount = 0; // الاتصالات والداتا سنتر
+    let storageCount = 0;    // المخازن بكل أنواعها
+    let servicesCount = 0;   // الخدمات (مطاعم، مصليات، عيادة، بريك، تدخين)
+
+    data.forEach(item => {
+        let name = item["Name"] || "";
+        let lowerName = name.toLowerCase().trim();
+        
+        // 1. غرف وقاعات التدريب والاجتماعات
+        if (lowerName.includes("تدريب") || lowerName.includes("إجتماع") || lowerName.includes("اجتماع")) {
+            trainingCount++;
+        }
+        // 2. صالات ومساحات العمل المباشر والمكاتب الإدارية والـ CEO
+        else if (lowerName.includes("صالة عمل") || lowerName.includes("صاله عمل") || lowerName.includes("مكتب") || lowerName.includes("ceo") || lowerName.includes("أكسيد") || lowerName.includes("فيديوترون") || lowerName.includes("فيديو ترون") || lowerName.includes("هلب ديسك")) {
+            workCount++;
+        }
+        // 3. بوابات ومنافذ الطوارئ، الجراجات، الحراسة وأفراد الأمن
+        else if (lowerName.includes("باب") || lowerName.includes("مخرج") || lowerName.includes("مدخل") || lowerName.includes("جراج") || lowerName.includes("طوارئ") || lowerName.includes("طوارىء") || lowerName.includes("أمن") || lowerName.includes("الامن") || lowerName.includes("جارد") || lowerName.includes("خلفى")) {
+            securityCount++;
+        }
+        // 4. البنية التحتية للطاقة: كهرباء، مولدات، تكييف، طلمبات وضغط عالي و AHU
+        else if (lowerName.includes("كهرباء") || lowerName.includes("تكييف") || lowerName.includes("طلمبات") || lowerName.includes("ahu") || lowerName.includes("المولد") || lowerName.includes("الضغط العالى") || lowerName.includes("وقود") || lowerName.includes("ميكانيكا") || lowerName.includes("لوحة")) {
+            powerCount++;
+        }
+        // 5. الاتصالات الحرجة: سنترال، داتا سنتر، اتصالات ومخزن اتصالات وغرف الداتا والـ FM200 المرتبطة بها أمنياً
+        else if (lowerName.includes("سنترال") || lowerName.includes("داتا") || lowerName.includes("اتصالات") || lowerName.includes("fm200") || lowerName.includes("أسطوان") || lowerName.includes("اسطوان") || lowerName.includes("أكسس")) {
+            datacenterCount++;
+        }
+        // 6. المخازن اللوجستية والرابش
+        else if (lowerName.includes("مخزن") || lowerName.includes("المخزن") || lowerName.includes("رابش")) {
+            storageCount++;
+        }
+        // 7. الخدمات والمرافق والراحة العامة للموظفين
+        else if (lowerName.includes("مطعم") || lowerName.includes("كافتيريا") || lowerName.includes("بوفيه") || lowerName.includes("بوفـــيه") || lowerName.includes("ماركت") || lowerName.includes("مصلى") || lowerName.includes("مسجد") || lowerName.includes("عيادة") || lowerName.includes("بريك") || lowerName.includes("تدخين") || lowerName.includes("استراحة") || lowerName.includes("نظافة") || lowerName.includes("عمال")) {
+            servicesCount++;
+        }
+    });
+
+    // حقن الأرقام الناتجة عن رؤيتنا التحليلية الشاملة
+    document.getElementById("count-training").innerText = trainingCount;
+    document.getElementById("count-work").innerText = workCount;
+    document.getElementById("count-security").innerText = securityCount;
+    document.getElementById("count-power").innerText = powerCount;
+    document.getElementById("count-datacenter").innerText = datacenterCount;
+    document.getElementById("count-storage").innerText = storageCount;
+    document.getElementById("count-services").innerText = servicesCount;
+
+    // إخفاء رسالة التحميل وعرض لوحة الإحصائيات
+    document.getElementById("loading-msg").style.display = "none";
+    document.getElementById("dashboard-content").style.display = "grid";
+  })
+  .catch(error => {
+    console.error("Error generating advanced dashboard:", error);
+    document.getElementById("loading-msg").innerText = "حدث خطأ أثناء تحميل لوحة التحليلات المتقدمة.";
+  });
+</script>
+
+</body>
+</html>
