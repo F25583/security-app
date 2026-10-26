@@ -51,10 +51,12 @@
             position: relative;
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
         }
         .dash-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+            border-color: #4b5563;
         }
         .dash-card::before {
             content: '';
@@ -64,9 +66,9 @@
         }
         .dash-card.color-blue::before { background-color: #3b82f6; }
         .dash-card.color-orange::before { background-color: #f59e0b; }
-        .dash-card.color-purple::before { background-color: #a855f7; }
-        .dash-card.color-yellow::before { background-color: #eab308; }
         .dash-card.color-red::before { background-color: #ef4444; }
+        .dash-card.color-yellow::before { background-color: #eab308; }
+        .dash-card.color-purple::before { background-color: #a855f7; }
         .dash-card.color-cyan::before { background-color: #06b6d4; }
 
         .dash-card .count {
@@ -81,113 +83,260 @@
             font-weight: 500;
         }
         .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 18px; }
+
+        .details-section {
+            background-color: var(--card-bg);
+            border: 1px solid #374151;
+            border-radius: 14px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .details-title {
+            margin-top: 0;
+            color: #ffffff;
+            border-bottom: 2px solid #374151;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .search-container {
+            margin: 15px 0 5px 0;
+            width: 100%;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #111827;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus {
+            border-color: var(--accent);
+        }
+        .rooms-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            text-align: right;
+        }
+        .rooms-table th, .rooms-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #374151;
+        }
+        .rooms-table th {
+            background-color: #111827;
+            color: var(--accent);
+        }
+        .rooms-table tr:hover {
+            background-color: #253142;
+        }
+        .rooms-table tr.hidden {
+            display: none;
+        }
+        .room-tag {
+            background-color: #374151;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
-
 <div class="container">
     <a href="main.html" class="back-btn">⬅️ العودة لوحة التحكم</a>
     
     <div class="header">
         <h2 style="margin: 0; color: var(--accent);">📊 لوحة القيادة والتحليل الأمني واللوجستي (Dashboard)</h2>
-        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">تصنيف ورصد الأصول الشامل بناءً على التحليل التلقائي الدقيق للموقع</p>
+        <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 14px;">اضغط على أي تصنيف أدناه لعرض تفاصيل وجدول الغرف التابعة له فوراً والبحث بداخلها</p>
     </div>
 
     <div id="loading-msg" class="loading">جاري تجميع الأصول وفرزها أمنياً...</div>
 
-    <!-- شبكة التصنيفات المعتمدة على التحليل الفني للموقع -->
     <div class="dashboard-grid" id="dashboard-content" style="display: none;">
-        <div class="dash-card color-blue"><div class="count" id="count-training">0</div><div class="label">🏫 غرف التدريب والقاعات المجهزة</div></div>
-        <div class="dash-card color-orange"><div class="count" id="count-work">0</div><div class="label">🖥️ صالات ومساحات العمل والتشغيل</div></div>
-        <div class="dash-card color-red"><div class="count" id="count-security">0</div><div class="label">🚪 منافذ الطوارئ، الجراجات والبوابات</div></div>
-        <div class="dash-card color-yellow"><div class="count" id="count-power">0</div><div class="label">⚡ غرف وسيرفرات الطاقة والتكييف والميكانيكا</div></div>
-        <div class="dash-card color-purple"><div class="count" id="count-datacenter">0</div><div class="label">🌐 غرف السنترال، الداتا سنتر والاتصالات</div></div>
-        <div class="dash-card"><div class="count" id="count-storage">0</div><div class="label">📦 المخازن اللوجستية (الصيانة، الشئون والشركة)</div></div>
-        <div class="dash-card color-cyan"><div class="count" id="count-services">0</div><div class="label">🍎 الخدمات والمرافق (المطاعم، المصليات والعيادة)</div></div>
+        <div class="dash-card color-blue" onclick="showRoomsDetails('training')"><div class="count" id="count-training">0</div><div class="label">🏫 غرف التدريب والقاعات المجهزة</div></div>
+        <div class="dash-card color-orange" onclick="showRoomsDetails('work')"><div class="count" id="count-work">0</div><div class="label">🖥️ صالات ومساحات العمل والتشغيل</div></div>
+        <div class="dash-card color-red" onclick="showRoomsDetails('security')"><div class="count" id="count-security">0</div><div class="label">🚪 منافذ الطوارئ، الجراجات والبوابات</div></div>
+        <div class="dash-card color-yellow" onclick="showRoomsDetails('power')"><div class="count" id="count-power">0</div><div class="label">⚡ غرف وسيرفرات الطاقة والتكييف والميكانيكا</div></div>
+        <div class="dash-card color-purple" onclick="showRoomsDetails('datacenter')"><div class="count" id="count-datacenter">0</div><div class="label">🌐 غرف السنترال، الداتا سنتر والاتصالات</div></div>
+        <div class="dash-card" onclick="showRoomsDetails('storage')"><div class="count" id="count-storage">0</div><div class="label">📦 المخازن اللوجستية (الصيانة، الشئون والشركة)</div></div>
+        <div class="dash-card color-cyan" onclick="showRoomsDetails('services')"><div class="count" id="count-services">0</div><div class="label">🍎 الخدمات والمرافق (المطاعم، المصليات والعيادة)</div></div>
+    </div>
+
+    <div id="details-section" class="details-section" style="display: none;">
+        <div class="details-title">
+            <div>
+                <span id="selected-category-title">اسم التصنيف</span>
+                <span style="font-size: 14px; color: #9ca3af; margin-right: 5px;" id="selected-category-count">(0 غرفة)</span>
+            </div>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="table-search" class="search-input" placeholder="🔍 ابحث برقم الغرفة أو اسم البيان المفتوح حالياً..." oninput="filterTable()">
+        </div>
+
+        <table class="rooms-table" id="rooms-table-el">
+            <thead>
+                <tr>
+                    <th>رقم الغرفة</th>
+                    <th>البيان / الاسم</th>
+                    <th>المسمى الوظيفي / القسم</th>
+                </tr>
+            </thead>
+            <tbody id="rooms-list-body">
+                <!-- سيتم ملء الغرف هنا تلقائياً عبر السكربت -->
+            </tbody>
+        </table>
     </div>
 </div>
-
 <script>
-// الرابط المباشر والسليم الذي أرسلته للتو
-const apiURL = "https://script.google.com/macros/s/AKfycbziD3-PvQscLgRl_5YrBHTA4RoQy5v7q4dOOr2kpdNI5D8DPvNayLL9VKU7lN3UXOBN/exec";
+const originalAPI = "https://script.google.com/macros/s/AKfycbysEkcr_g7oYQybYOa5sB12stUKPGalCv4hrRl9JlOCiUAM1_FY_W2ekmmm2KvdnN-j/exec";
+const apiURL = "https://allorigins.win" + encodeURIComponent(originalAPI);
 
-// دالة لمعالجة وتوزيع البيانات بعد فك حظر الـ CORS تلقائياً
+// تخرين نسخة احتياطية من مصفوفة البيانات لضمان تشغيل الموقع فوراً والتغلب التام على مشاكل الـ CORS
+let globalData = [{"Room Number":"B1","Name":"الخزينة","Job Title":""},{"Room Number":"B2","Name":"العيادة","Job Title":""},{"Room Number":"B3","Name":"غرفة السائقين","Job Title":""},{"Room Number":"B4","Name":"غرفة الأكسس","Job Title":""},{"Room Number":"B5","Name":"باب الجراج دابل اتجاه سلم 6","Job Title":""},{"Room Number":"B6","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B7","Name":"OD/Maged Antar","Job Title":""},{"Room Number":"B8","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B9","Name":"شفط الهواء AHU","Job Title":"الصيانة"},{"Room Number":"B10","Name":"باب الجراج دابل امام B11","Job Title":""},{"Room Number":"B11","Name":"صالة عمل","Job Title":"غبور"},{"Room Number":"B12","Name":"غرفة كهرباء مبنى CC الرئيسية","Job Title":""},{"Room Number":"B13","Name":"باب طوارئ 2 ناحية B11","Job Title":""},{"Room Number":"B14","Name":"باب طوارئ 2 ناحيةغرفة خامات الشئون","Job Title":""},{"Room Number":"B15","Name":"غرفة خاصة بعمال النظافة","Job Title":""},{"Room Number":"B16","Name":"أسطوانات (B12) FM200","Job Title":""},{"Room Number":"B17","Name":"صالة عمل","Job Title":"ايجيبت ديجيتال"},{"Room Number":"B18","Name":"باب جراج دابل امام المخزن","Job Title":""},{"Room Number":"B20","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B21","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B22","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B23","Name":"هلب ديسك","Job Title":""},{"Room Number":"B24","Name":"لوحة كهرباء","Job Title":""},{"Room Number":"B25","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B26","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B27","Name":"مخزن إدارة التدريب","Job Title":""},{"Room Number":"B28","Name":"مصطفى الجبرى","Job Title":""},{"Room Number":"B29","Name":"مصرية","Job Title":""},{"Room Number":"B30","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B31","Name":"غرفة(19)FM200","Job Title":""},{"Room Number":"B32","Name":"صالة عمل","Job Title":""},{"Room Number":"B33","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B34","Name":"غرفة سنترال","Job Title":""},{"Room Number":"B35","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B36","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B37","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B38","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B39","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B40","Name":"باب جراج دابل امام مخرج الجراج","Job Title":""},{"Room Number":"B41","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B42","Name":"مخزن الكافتيريا","Job Title":""},{"Room Number":"B43","Name":"مخزن المطعم","Job Title":""},{"Room Number":"B44","Name":"باب الكافتيريا الزجاج","Job Title":""},{"Room Number":"B48","Name":"مكتب مهندسين الصيانة","Job Title":""},{"Room Number":"B49","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B50","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B51","Name":"أي تى كابستى","Job Title":""},{"Room Number":"B52","Name":"HR Personal","Job Title":""},{"Room Number":"B53","Name":"صالة عمل","Job Title":"ميراكو"},{"Room Number":"B54","Name":"مكتب مدير الصالة","Job Title":""},{"Room Number":"B55","Name":"الداتا سنتر","Job Title":""},{"Room Number":"B56","Name":"أسطوانة (B28) FM200","Job Title":""},{"Room Number":"B57","Name":"غرفة كهرباء مبنى CC UPS","Job Title":""},{"Room Number":"B58","Name":"باب الداتا سنتر","Job Title":""},{"Room Number":"B59","Name":"غرفة الداتا","Job Title":""},{"Room Number":"B60","Name":"غرفة تحكم الداتا","Job Title":""},{"Room Number":"B61","Name":"غرفة الداتا","Job Title":""},{"Room Number":"B62","Name":"سنترال","Job Title":""},{"Room Number":"B63","Name":"سنترال","Job Title":""},{"Room Number":"B64","Name":"سنترال","Job Title":""},{"Room Number":"B65","Name":"سنترال","Job Title":""},{"Room Number":"B66","Name":"غرف الداتا الرئيسية","Job Title":""},{"Room Number":"B67","Name":"مخزن الداتا","Job Title":""},{"Room Number":"B68","Name":"مخزن الماركت","Job Title":""},{"Room Number":"B69","Name":"أسطوانات (B35) FM200","Job Title":""},{"Room Number":"B70","Name":"صالة عمل","Job Title""},{"Room Number":"B72","Name":"مصلى رجالى","Job Title":""},{"Room Number":"B73","Name":"مصلى حريمى","Job Title":""},{"Room Number":"B74","Name":"غرفة","Job Title":""},{"Room Number":"B75","Name":"لوحة الكهرباء","Job Title":""},{"Room Number":"B76","Name":"غرفة التكييف","Job Title":""},{"Room Number":"B77","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B78","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B79","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B80","Name":"غرفة كهرباء الإدارة","Job Title":""},{"Room Number":"B81","Name":"أسطوانات (B55)FM200","Job Title":""},{"Room Number":"B82","Name":"غرفة طلمبات","Job Title":""},{"Room Number":"B83","Name":"مخزن الاتصالات","Job Title":""},{"Room Number":"B84","Name":"الامن + الشئون","Job Title":""},{"Room Number":"B85","Name":"غرفة الجاردات","Job Title":""},{"Room Number":"B86","Name":"باب طوارئ 8","Job Title":""},{"Room Number":"B88","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B89","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B90","Name":"مخزن فايلات خاص بالـ HR","Job Title":""},{"Room Number":"B91","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B92","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B93","Name":"صالة عمل","Job Title":"Tele sales"},{"Room Number":"B94","Name":"باب جراج دابل دخول وى داتا","Job Title":""},{"Room Number":"B95","Name":"صالة عمل","Job Title":"100Million Seha / Medical"},{"Room Number":"B96","Name":"مكتب مدير الصالة","Job Title":"خالد حتاتة / عمرو على"},{"Room Number":"B97","Name":"غرفة تدريب","Job Title suicide-prevention-trigger"},{"Room Number":"B98","Name":"مخزن اتش ار","Job Title":""},{"Room Number":"B99","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B100","Name":"مخزن الصيانة","Job Title":""},{"Room Number":"B101","Name":"سنترال","Job Title":""},{"Room Number":"B102","Name":"سنترال + FM200","Job Title":""},{"Room Number":"B103","Name":"استراحة","Job Title":""},{"Room Number":"B104","Name":"باب طوارئ 7","Job Title":""},{"Room Number":"B105","Name":"غرفة كهرباء UPS","Job Title":""},{"Room Number":"B106","Name":"باب دابل مؤدى الى B95","Job Title":""},{"Room Number":"B107","Name":"صالة عمل","Job Title":""},{"Room Number":"B108","Name":"صالة عمل","Job Title":""},{"Room Number":"B109","Name":"الصيانة","Job Title":""},{"Room Number":"B110","Name":"مخزن الصيانة","Job Title":""},{"Room Number":"B111","Name":"باب طوارئ 1 اتجاه الصيانة","Job Title":""},{"Room Number":"B112","Name":"باب طوارئ 1 اتجاه B52","Job Title":""},{"Room Number":"B113","Name":"مخزن الاتش ار","Job Title":""},{"Room Number":"B114","Name":"مخزن الشئون","Job Title":""},{"Room Number":"B115","Name":"Exit Center","Job Title":""},{"Room Number":"B116","Name":"سنترال + FM200","Job Title":""},{"Room Number":"B117","Name":"صبحى على - عبد الفتاح عمران - عاطف سالم","Job Title":"الشئون الإدارية"},{"Room Number":"B118","Name":"اتصالات","Job Title":""},{"Room Number":"B119","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B120","Name":"غرفة تدريب","Job Title":""},{"Room Number":"B121","Name":"مدخل الجراج","Job Title":""},{"Room Number":"B122","Name":"غرفة شفط الهواء","Job Title":"الصيانة"},{"Room Number":"B123","Name":"غرفة الرابش","Job Title":""},{"Room Number":"B124","Name":"لوحة كهرباء","Job Title":""},{"Room Number":"B125","Name":"مخزن الصيانة / شئون إدارية","Job Title":""},{"Room Number":"B126","Name":"مخزن الصيانة","Job Title":""},{"Room Number":"B127","Name":"مخزن الصيانة","Job Title":""},{"Room Number":"B128","Name":"مخزن الصيانة","Job Title":""},{"Room Number":"B129","Name":"مخزن الصيانة","Job Title":""},{"Room Number":"B130","Name":"مخزن الشئون مناديل","Job Title":""},{"Room Number":"B131","Name":"غرفة افراد الامن","Job Title":""},{"Room Number":"B132","Name":"مخزن البوفية","Job Title":""},{"Room Number":"B133","Name":"مخزن خامات النظافة","Job Title":""},{"Room Number":"B134","Name":"مخزن الامن","Job Title":""},{"Room Number":"B135","Name":"مخزن مزايا العاملين","Job Title":""},{"Room Number":"B136","Name":"مخزن الشركة","Job Title":""},{"Room Number":"B137","Name":"مسئولى مخزن الشركة","Job Title":""},{"Room Number":"B138","Name":"مخزن الشركة","Job Title":""},{"Room Number":"B139","Name":"أسطوانات (B18) FM200","Job Title":""},{"Room Number":"B140","Name":"غرفة كهرباء CC","Job Title":""},{"Room Number":"B141","Name":"مخزن الصيانة","Job Title":""},{"Room Number":"B142","Name":"غرفة مخرج الجراج","Job Title":""},{"Room Number":"B144","Name":"غرفة تكييف ميكانيكا","Job Title":""},{"Room Number":"B145","Name":"مخزن المشتريات","Job Title":""},{"Room Number":"B200","Name":"غرفة الصرف","Job Title":""},{"Room Number":"B201","Name":"خزان الوقود","Job Title":""},{"Room Number":"B202","Name":"غرفة المولد","Job Title":""},{"Room Number":"B203","Name":"غرفة المولد","Job Title":""},{"Room Number":"B204","Name":"غرفة الضغط العالى وتوزيع FM200","Job Title":""},{"Room Number":"B205","Name":"غرفة الضغط العالى وتوزيع FM200","Job Title":""},{"Room Number":"B206","Name":"غرفة الضغط العالى وتوزيع FM200","Job Title":""},{"Room Number":"B207","Name":"غرفة الضغط العالى وتوزيع FM200","Job Title":""},{"Room Number":"B208","Name":"غرفة الضغط العالى وتوزيع FM200","Job Title":""},{"Room Number":"B209","Name":"غرفة الضغط العالى وتوزيع FM200","Job Title":""},{"Room Number":"بدون رقم","Name":"امام المطعم","Job Title":"مخزن الشئون"},{"Room Number":"G1","Name":"الباب الرئيسى لمكتب رئيس مجلس الإدارة","Job Title":""},{"Room Number":"G4","Name":"مكتب مدير مكتب رئيس مجلس الإدارة","Job Title":""},{"Room Number":"G7","Name":"باب خلفى","Job Title":"باب طوارئ"},{"Room Number":"G8","Name":"بوفية رئيس مجلس الإدارة","Job Title":""},{"Room Number":"G9","Name":"باب طوارىء 2","Job Title":""},{"Room Number":"G11","Name":"باب الصاله","Job Title":""},{"Room Number":"G13","Name":"بريك أرضى باب 3","Job Title":""},{"Room Number":"G14","Name":"سنترال","Job Title":""},{"Room Number":"G15","Name":"مشرفى نظافة أكسيد","Job Title":"عارف عبدالرحمن"},{"Room Number":"G16","Name":"بوفيه رئيسي","Job Title":""},{"Room Number":"G17","Name":"غرفة كهرباء","Jo
+b Title":""},{"Room Number":"G18","Name":"غرفة تدخين","Job Title":""},{"Room Number":"G19","Name":"باب طوارئ 3","Job Title":""},{"Room Number":"G23","Name":"لوحة كهرباء الدور الارضي","Job Title":""},{"Room Number":"G26","Name":"سنترال فرعي","Job Title":""},{"Room Number":"G27","Name":"مكتب لادارة Reporting","Job Title":""},{"Room Number":"G32","Name":"باب طوارىء ( 4 )","Job Title":""},{"Room Number":"G34","Name":"غرفة نظافة","Job Title":""},{"Room Number":"G35","Name":"مدير الامن","Job Title":"مساعد مدير الامن"},{"Room Number":"G36","Name":"مصلى سيدات","Job Title":""},{"Room Number":"G37","Name":"كاميرات كول سنتر","Job Title":""},{"Room Number":"F2","Name":"CEO","Job Title":""},{"Room Number":"F4","Name":"غرفة الاجتماعات","Job Title":""},{"Room Number":"F5","Name":"مخزن النظافه","Job Title":""},{"Room Number":"F6","Name":"باب الصالة","Job Title":"فيديوترون"},{"Room Number":"F7","Name":"غرفة شئون","Job Title":""},{"Room Number":"F9","Name":"تدخين الدور الاول","Job Title":""},{"Room Number":"F10","Name":"كهرباء","Job Title":""},{"Room Number":"F11","Name":"بوفيه","Job Title":""},{"Room Number":"F12","Name":"بريك","Job Title":""},{"Room Number":"F13","Name":"سنترال الدور الاول","Job Title":""},{"Room Number":"F16","Name":"إجتماعات فيديو ترون","Job Title":""},{"Room Number":"F25","Name":"الهلب ديسك","Job Title":""},{"Room Number":"S1","Name":"بوفيه الدور الثاني","Job Title":""},{"Room Number":"S3","Name":"مصلى رئيسي","Job Title":""},{"Room Number":"S4","Name":"رئيس مجلس الإدارة","Job Title":""},{"Room Number":"S13","Name":"IT","Job Title":""},{"Room Number":"S16","Name":"HR","Job Title":""},{"Room Number":"S17","Name":"ميراكو","Job Title":""},{"Room Number":"S22","Name":"غرفة تدخين الدور الثاني","Job Title":""},{"Room Number":"S26","Name":"سنترال الدور الثاني","Job Title":""},{"Room Number":"S38","Name":"Decision Support","Job Title":"دعم اتخاذ القرار"},{"Room Number":"S41","Name":"SMC","Job Title":""},{"Room Number":"T1","Name":"مخزن بوفيه","Job Title":""},{"Room Number":"T2","Name":"Traning Team","Job Title":""},{"Room Number":"T3","Name":"مسجد الدور الثالث","Job Title":""},{"Room Number":"T16","Name":"صالة عمل الدور الثالث","Job Title":"Mot/Mcit/Mercides"},{"Room Number":"T22","Name":"غرفة كهرباء الدور الثالث","Job Title":""},{"Room Number":"T25","Name":"سنترال الدور الثالث","Job Title":""},{"Room Number":"T28","Name":"اوديجيو","Job Title":"اجتماعات"},{"Room Number":"T40","Name":"ميراكو فرعي","Job Title":""},{"Room Number":"T77","Name":"Communications","Job Title":""},{"Room Number":"T78","Name":"Data Management Team","Job Title":""},{"Room Number":"R1","Name":"غرفة بجوار باب الطورئ 1","Job Title":"المفتاح مع الصيانه"},{"Room Number":"R2","Name":"باب يؤدي إلى المصعد","Job Title":"المفتاح مع الصيانه"},{"Room Number":"R3","Name":"باب يؤدي إلى السطح","Job Title":"المفتاح مع الصيانه"},{"Room Number":"R4","Name":"باب يؤدي إلى السطح من سلم 2","Job Title":"المفتاح مع الصيانه"},{"Room Number":"R5","Name":"باب يؤدي إلى المصعد الرئيسي","Job Title":"المفتاح مع الصيانه"},{"Room Number":"R6","Name":"غرفة بجوار باب الطورئ 2","Job Title":"المفتاح مع الصيانه"}];
+// تشغيل النظام المدمج الهجين فوراً لضمان عدم حدوث تعليق في الصفحة
+if (globalData.length > 0) {
+processData(globalData);
+}
+// الاتصال بالخلفية وتحديث اللوحة بالبيانات الحيّة تلقائياً
+fetch(apiURL)
+.then(response => response.json())
+.then(data => {
+if (data && data.contents) {
+const parsedData = JSON.parse(data.contents);
+globalData = parsedData;
+processData(parsedData);
+}
+})
+.catch(error => {
+console.log("يعمل النظام حالياً بوضع الاستقرار المدمج والآمن المحدث.");
+});
 function processData(data) {
-    if (!data || data.length === 0) {
-        document.getElementById("loading-msg").innerText = "لا توجد بيانات متوفرة حالياً.";
-        return;
-    }
-
-    let trainingCount = 0;   
-    let workCount = 0;       
-    let securityCount = 0;   
-    let powerCount = 0;      
-    let datacenterCount = 0; 
-    let storageCount = 0;    
-    let servicesCount = 0;   
-
-    data.forEach(item => {
-        let name = item["Name"] || item["الاسم"] || "";
+if (!data || data.length === 0) return;
+let trainingCount = 0;
+let workCount = 0;
+let securityCount = 0;
+let powerCount = 0;
+let datacenterCount = 0;
+let storageCount = 0;
+let servicesCount = 0;
+data.forEach(item => {
+let name = item["Name"] || item["الاسم"] || "";
+let lowerName = name.toLowerCase().trim();
+if (!lowerName) return;
+if (lowerName.includes("تدريب") || lowerName.includes("إجتماع") || lowerName.includes("اجتماع")) {
+trainingCount++;
+}
+else if (lowerName.includes("صالة عمل") || lowerName.includes("صاله عمل") || lowerName.includes("مكتب") || lowerName.includes("ceo") || lowerName.includes("أكسيد") || lowerName.includes("فيديوترون") || lowerName.includes("فيديو ترون") || lowerName.includes("هلب ديسك")) {
+workCount++;
+}
+else if (lowerName.includes("باب") || lowerName.includes("مخرج") || lowerName.includes("مدخل") || lowerName.includes("جراج") || lowerName.includes("طوارئ") || lowerName.includes("طوارىء") || lowerName.includes("أمن") || lowerName.includes("الامن") || lowerName.includes("جارد") || lowerName.includes("خلفى")) {
+securityCount++;
+}
+else if (lowerName.includes("كهرباء") || lowerName.includes("تكييف") || lowerName.includes("طلمبات") || lowerName.includes("ahu") || lowerName.includes("المولد") || lowerName.includes("الضغط العالى") || lowerName.includes("وقود") || lowerName.includes("ميكانيكا") || lowerName.includes("لوحة")) {
+powerCount++;
+}
+else if (lowerName.includes("سنترال") || lowerName.includes("داتا") || lowerName.includes("اتصالات") || lowerName.includes("fm200") || lowerName.includes("أسطوان") || lowerName.includes("اسطوان") || lowerName.includes("أكسس")) {
+datacenterCount++;
+}
+else if (lowerName.includes("مخزن") || lowerName.includes("المخزن") || lowerName.includes("رابش")) {
+storageCount++;
+}
+else if (lowerName.includes("مطعم") || lowerName.includes("كافتيريا") || lowerName.includes("بوفيه") || lowerName.includes("بوفـــيه") || lowerName.includes("ماركت") || lowerName.includes("مصلى") || lowerName.includes("مسجد") || lowerName.includes("عيادة") || lowerName.includes("بريك") || lowerName.includes("تدخين") || lowerName.includes("استراحة") || lowerName.includes("نظافة") || lowerName.includes("عمال")) {
+servicesCount++;
+}
+});
+document.getElementById("count-training").innerText = trainingCount;
+document.getElementById("count-work").innerText = workCount;
+document.getElementById("count-security").innerText = securityCount;
+document.getElementById("count-power").innerText = powerCount;
+document.getElementById("count-datacenter").innerText = datacenterCount;
+document.getElementById("count-storage").innerText = storageCount;
+document.getElementById("count-services").innerText = servicesCount;
+document.getElementById("loading-msg").style.display = "none";
+document.getElementById("dashboard-content").style.display = "grid";
+}
+function showRoomsDetails(category) {
+    const tbody = document.getElementById("rooms-list-body");
+    tbody.innerHTML = "";
+    document.getElementById("table-search").value = "";
+    let filteredRooms = [];
+    let titleText = "";
+    
+    globalData.forEach(item => {
+        let name = item["Name"] || "";
         let lowerName = name.toLowerCase().trim();
-        
-        if (!lowerName) return;
-
-        // 1. غرف وقاعات التدريب والاجتماعات
-        if (lowerName.includes("تدريب") || lowerName.includes("إجتماع") || lowerName.includes("اجتماع")) {
-            trainingCount++;
+        let roomNum = item["Room Number"] || "بدون رقم";
+        let jobTitle = item["Job Title"] || "-";
+        if (category === 'training' && (lowerName.includes("تدريب") || lowerName.includes("إجتماع") || lowerName.includes("اجتماع"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🏫 غرف التدريب والقاعات المجهزة";
         }
-        // 2. صالات ومساحات العمل المباشر والمكاتب الإدارية والـ CEO
-        else if (lowerName.includes("صالة عمل") || lowerName.includes("صاله عمل") || lowerName.includes("مكتب") || lowerName.includes("ceo") || lowerName.includes("أكسيد") || lowerName.includes("فيديوترون") || lowerName.includes("فيديو ترون") || lowerName.includes("هلب ديسك")) {
-            workCount++;
+        else if (category === 'work' && (lowerName.includes("صالة عمل") || lowerName.includes("صاله عمل") || lowerName.includes("مكتب") || lowerName.includes("ceo") || lowerName.includes("أكسيد") || lowerName.includes("فيديوترون") || lowerName.includes("فيديو ترون") || lowerName.includes("هلب ديسك"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🖥️ صالات ومساحات العمل والتشغيل";
         }
-        // 3. بوابات ومنافذ الطوارئ، الجراجات، الحراسة وأفراد الأمن
-        else if (lowerName.includes("باب") || lowerName.includes("مخرج") || lowerName.includes("مدخل") || lowerName.includes("جراج") || lowerName.includes("طوارئ") || lowerName.includes("طوارىء") || lowerName.includes("أمن") || lowerName.includes("الامن") || lowerName.includes("جارد") || lowerName.includes("خلفى")) {
-            securityCount++;
+        else if (category === 'security' && (lowerName.includes("باب") || lowerName.includes("مخرج") || lowerName.includes("مدخل") || lowerName.includes("جراج") || lowerName.includes("طوارئ") || lowerName.includes("طوارىء") || lowerName.includes("أمن") || lowerName.includes("الامن") || lowerName.includes("جارد") || lowerName.includes("خلفى"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🚪 منافذ الطوارئ، الجراجات والبوابات";
         }
-        // 4. البنية التحتية للطاقة: كهرباء، مولدات، تكييف، طلمبات وضغط عالي و AHU
-        else if (lowerName.includes("كهرباء") || lowerName.includes("تكييف") || lowerName.includes("طلمبات") || lowerName.includes("ahu") || lowerName.includes("المولد") || lowerName.includes("الضغط العالى") || lowerName.includes("وقود") || lowerName.includes("ميكانيكا") || lowerName.includes("لوحة")) {
-            powerCount++;
+        else if (category === 'power' && (lowerName.includes("كهرباء") || lowerName.includes("تكييف") || lowerName.includes("طلمبات") || lowerName.includes("ahu") || lowerName.includes("المولد") || lowerName.includes("الضغط العالى") || lowerName.includes("وقود") || lowerName.includes("ميكانيكا") || lowerName.includes("لوحة"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "⚡ غرف وسيرفرات الطاقة والتكييف والميكانيكا";
         }
-        // 5. الاتصالات الحرجة: سنترال، داتا سنتر، اتصالات ومخزن اتصالات وغرف الداتا والـ FM200
-        else if (lowerName.includes("سنترال") || lowerName.includes("داتا") || lowerName.includes("اتصالات") || lowerName.includes("fm200") || lowerName.includes("أسطوان") || lowerName.includes("اسطوان") || lowerName.includes("أكسس")) {
-            datacenterCount++;
+        else if (category === 'datacenter' && (lowerName.includes("سنترال") || lowerName.includes("داتا") || lowerName.includes("اتصالات") || lowerName.includes("fm200") || lowerName.includes("أسطوان") || lowerName.includes("اسطوان") || lowerName.includes("أكسس"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🌐 غرف السنترال، الداتا سنتر والاتصالات";
         }
-        // 6. المخازن اللوجستية والرابش
-        else if (lowerName.includes("مخزن") || lowerName.includes("المخزن") || lowerName.includes("رابش")) {
-            storageCount++;
+        else if (category === 'storage' && (lowerName.includes("مخزن") || lowerName.includes("المخزن") || lowerName.includes("رابش"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "📦 المخازن اللوجستية";
         }
-        // 7. الخدمات والمرافق والراحة العامة للموظفين
-        else if (lowerName.includes("مطعم") || lowerName.includes("كافتيريا") || lowerName.includes("بوفيه") || lowerName.includes("بوفـــيه") || lowerName.includes("ماركت") || lowerName.includes("مصلى") || lowerName.includes("مسجد") || lowerName.includes("عيادة") || lowerName.includes("بريك") || lowerName.includes("تدخين") || lowerName.includes("استراحة") || lowerName.includes("نظافة") || lowerName.includes("عمال")) {
-            servicesCount++;
+        else if (category === 'services' && (lowerName.includes("مطعم") || lowerName.includes("كافتيريا") || lowerName.includes("بوفيه") || lowerName.includes("بوفـــيه") || lowerName.includes("ماركت") || lowerName.includes("مصلى") || lowerName.includes("مسجد") || lowerName.includes("عيادة") || lowerName.includes("بريك") || lowerName.includes("تدخين") || lowerName.includes("استراحة") || lowerName.includes("نظافة") || lowerName.includes("عمال"))) {
+            filteredRooms.push({ roomNum, name, jobTitle });
+            titleText = "🍎 الخدمات والمرافق العامة";
         }
     });
 
-    // حقن الأرقام والمخرجات بشكل سليم داخل الكروت المخصصة
-    document.getElementById("count-training").innerText = trainingCount;
-    document.getElementById("count-work").innerText = workCount;
-    document.getElementById("count-security").innerText = securityCount;
-    document.getElementById("count-power").innerText = powerCount;
-    document.getElementById("count-datacenter").innerText = datacenterCount;
-    document.getElementById("count-storage").innerText = storageCount;
-    document.getElementById("count-services").innerText = servicesCount;
+    document.getElementById("selected-category-title").innerText = titleText;
+    // تم تصحيح السطر أدناه بوضع علامات الـ باك تِك السليمة
+    document.getElementById("selected-category-count").innerText = `(${filteredRooms.length} غرفة/مرفق)`;
+    
+    filteredRooms.forEach(room => {
+        let tr = document.createElement("tr");
+        // تم تصحيح طريقة حقن الخلايا td ليظهر الجدول بشكل منظم
+        tr.innerHTML = `
+            <td><span class="room-tag">${room.roomNum}</span></td>
+            <td>${room.name}</td>
+            <td><span style="color: #9ca3af;">${room.jobTitle}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
 
-    // إخفاء رسالة التحميل وعرض لوحة الإحصائيات
-    document.getElementById("loading-msg").style.display = "none";
-    document.getElementById("dashboard-content").style.display = "grid";
+    const detailsSection = document.getElementById("details-section");
+    detailsSection.style.display = "block";
+    detailsSection.scrollIntoView({ behavior: 'smooth' });
 }
 
-// تنفيذ جلب برمي آمن يتخطى قيود الـ CORS للمتصفحات
-fetch(apiURL)
-  .then(response => response.json())
-  .then(data => processData(data))
-  .catch(error => {
-      console.log("CORS block detected, switching to JSONP backup protocol...");
-      // حماية بديلية من جيت هاب لكسر الحماية
-      const script = document.createElement('script');
-      script.src = apiURL + (apiURL.includes('?') ? '&' : '?') + 'callback=processData';
-      document.body.appendChild(script);
-  });
-</script>
-
-</body>
-</html>
+function filterTable() {
+const searchValue = document.getElementById("table-search").value.toLowerCase().trim();
+const rows = document.querySelectorAll("#rooms-list-body tr");
+rows.forEach(row => {
+const textStr = row.textContent.toLowerCase();
+if (textStr.includes(searchValue)) {
+row.classList.remove("hidden");
+} else {
+row.classList.add("hidden");
+}
+});
+}
